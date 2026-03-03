@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Earn - Play & Win</title>
     <style>
+        /* CSS बिल्कुल वैसा ही है, कोई बदलाव नहीं */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0b0e14; color: #e2e8f0; padding-bottom: 70px; } /* Padding for Bottom Nav */
+        body { background-color: #0b0e14; color: #e2e8f0; padding-bottom: 70px; } 
 
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #151a25; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0; z-index: 100;}
         .logo { font-weight: bold; color: #f3ba2f; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;}
@@ -65,13 +66,11 @@
         .bet-dir.down { color: #ff4d4d; }
         .bet-dir.num { color: #f3ba2f; font-size: 15px;}
 
-        /* 🔥 BOTTOM NAVIGATION BAR 🔥 */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #151a25; border-top: 1px solid #2a2f3a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000;}
         .nav-item { text-align: center; color: #a0a5b1; font-size: 11px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase;}
         .nav-item.active { color: #f3ba2f; }
         .nav-icon { font-size: 22px; margin-bottom: 3px; display: block;}
 
-        /* BETTING POPUP */
         .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
         .popup-box { background: #151a25; border: 1px solid #2a2f3a; width: 90%; max-width: 350px; border-radius: 15px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: popUp 0.3s ease-out;}
         .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px;}
@@ -87,7 +86,6 @@
         .btn-cancel { flex: 1; background: transparent; color: #a0a5b1; border: 1px solid #a0a5b1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase;}
         .btn-done { flex: 1; background: #2196F3; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase;}
 
-        /* WIN POPUP */
         .win-popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; }
         .win-popup { background: radial-gradient(circle, #2a2f3a 0%, #151a25 100%); border: 2px solid #f3ba2f; padding: 30px; border-radius: 20px; text-align: center; animation: popUp 0.5s; }
         .win-popup h1 { color: #00ff88; font-size: 35px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0,255,136,0.6);}
@@ -249,22 +247,41 @@
             if(!saved) { window.location.href = "index.html"; return; }
             userData = JSON.parse(saved);
             
-            // Ensure Game History array exists
             if(!userData.gameHistory) userData.gameHistory = [];
 
             document.getElementById('user-id-btn').innerText = "ID: " + userData.myRefCode;
             updateBalanceUI();
             startGlobalTimers();
             startFakeBots();
+
+            // 🔥 NEW: REAL-TIME ADMIN SYNC 🔥 (बिना किसी पुराने कोड को हटाए)
+            if(userData.phone) {
+                db.ref('users/' + userData.phone).on('value', (snapshot) => {
+                    if(snapshot.exists()) {
+                        let serverData = snapshot.val();
+                        
+                        // 1. अगर एडमिन ने ब्लॉक कर दिया है
+                        if(serverData.accountStatus === "Blocked") {
+                            alert("🚫 Your account has been BLOCKED by Admin.");
+                            localStorage.removeItem('smartEarnUser');
+                            window.location.href = "index.html";
+                            return;
+                        }
+                        
+                        // 2. रियल-टाइम बैलेंस सिंक (एडमिन बैलेंस बदलेगा तो यहाँ अपने आप दिखेगा)
+                        userData.inrBalance = parseFloat(serverData.inrBalance) || 0;
+                        document.getElementById('user-inr').innerText = "₹" + userData.inrBalance.toFixed(2);
+                        localStorage.setItem('smartEarnUser', JSON.stringify(userData));
+                    }
+                });
+            }
         };
 
-        // 🔥 FIREBASE UPDATE ADDED HERE 🔥
         function updateBalanceUI() {
             document.getElementById('user-inr').innerText = "₹" + userData.inrBalance.toFixed(2);
             localStorage.setItem('smartEarnUser', JSON.stringify(userData));
-            
             if(userData.phone) {
-                db.ref('users/' + userData.phone).set(userData).catch(err => console.log(err));
+                db.ref('users/' + userData.phone).update(userData).catch(err => console.log(err));
             }
         }
 
@@ -276,9 +293,9 @@
             }
 
             userData.checkInDay = (userData.checkInDay || 0) + 1;
-            if(userData.checkInDay > 7) userData.checkInDay = 1; // 7 din baad wapis day 1
+            if(userData.checkInDay > 7) userData.checkInDay = 1; 
 
-            let bonus = userData.checkInDay * 10; // Day 1 = 10, Day 2 = 20...
+            let bonus = userData.checkInDay * 10; 
             userData.inrBalance += bonus;
             userData.lastCheckIn = today;
             updateBalanceUI();
@@ -346,7 +363,6 @@
             switchBetTab('my'); closeBetPopup();
         }
 
-        // 🧠 COMPANY PROFIT LOGIC + GAME HISTORY SAVER 🧠
         function resolveRound(timeframe) {
             let bets = activeUserBets[timeframe];
             if(bets.length > 0) {
@@ -377,7 +393,6 @@
                     if(bet.type === 'DIR' && bet.value === winningDir) { isWin = true; profit = bet.amount * 1.9; } 
                     else if(bet.type === 'NUM' && bet.value === winningNum) { isWin = true; profit = bet.amount * 5.0; }
                     
-                    // 📜 Add to Game History 📜
                     let historyItem = {
                         date: dateStr, timeframe: timeframe,
                         betOn: bet.type === 'DIR' ? bet.value : "No. " + bet.value,
@@ -397,7 +412,6 @@
 
                 if(userTotalWin > 0) { userData.inrBalance += userTotalWin; updateBalanceUI(); showWinPopup(userTotalWin); }
                 
-                // 🔥 FIREBASE UPDATE FOR LOSING HISTORY 🔥
                 localStorage.setItem('smartEarnUser', JSON.stringify(userData)); 
                 if(userData.phone) {
                     db.ref('users/' + userData.phone).set(userData).catch(err => console.log(err));
