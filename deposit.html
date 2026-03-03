@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Earn - Deposit Funds</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0e14; color: #e2e8f0; }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #151a25; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0; z-index: 100;}
+        .logo { font-weight: bold; color: #f3ba2f; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;}
+        .back-btn { background: transparent; color: #fff; border: 1px solid #2a2f3a; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold;}
+
+        .container { max-width: 500px; margin: 0 auto; padding: 20px 15px; padding-bottom: 50px; }
+
+        .bonus-banner { background: linear-gradient(135deg, #ffba08, #f48c06); border-radius: 12px; padding: 15px; text-align: center; color: #000; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(243,186,47,0.3); animation: pulse 2s infinite;}
+        .bonus-banner h3 { font-size: 18px; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px;}
+        .bonus-banner p { font-size: 12px; font-weight: bold; margin-bottom: 10px;}
+        
+        .offers-grid { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;}
+        .offer-box { background: rgba(0,0,0,0.8); color: #fff; padding: 8px; border-radius: 8px; flex: 1; min-width: 30%; font-size: 11px; font-weight: bold;}
+        .offer-box span { color: #00ff88; display: block; font-size: 14px; margin-top: 3px;}
+        .offer-box.mega { background: #d50000; border: 1px solid #fff;}
+
+        .deposit-card { background: #151a25; border: 1px solid #2a2f3a; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px;}
+        .section-title { color: #a0a5b1; font-size: 12px; text-transform: uppercase; font-weight: bold; margin-bottom: 15px; text-align: center;}
+        
+        .upi-box { background: #0b0e14; border: 1px dashed #f3ba2f; border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 25px; position: relative;}
+        .upi-id { font-size: 18px; color: #f3ba2f; font-weight: bold; font-family: monospace; letter-spacing: 1px; margin-bottom: 10px;}
+        .copy-btn { background: #2a2f3a; color: #fff; border: none; padding: 5px 15px; border-radius: 5px; font-size: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase;}
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #a0a5b1; margin-bottom: 8px; text-transform: uppercase; font-weight: bold;}
+        
+        .amt-input-wrapper { display: flex; align-items: center; background: #0b0e14; border: 1px solid #2a2f3a; border-radius: 10px; overflow: hidden; }
+        .amt-input-wrapper span { padding: 15px; color: #f3ba2f; font-weight: bold; font-size: 18px; background: #1a202c;}
+        .custom-input { flex: 1; background: transparent; border: none; padding: 15px; color: #fff; font-size: 16px; font-weight: bold; outline: none; }
+        .file-input { padding: 10px; font-size: 12px; color: #a0a5b1; border: 1px solid #2a2f3a; border-radius: 10px; width: 100%; background: #0b0e14;}
+        
+        .quick-amts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;}
+        .q-btn { flex: 1; min-width: 30%; background: #2a2f3a; color: #fff; border: 1px solid #3b4150; padding: 10px 0; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s;}
+        .q-btn:active { background: #f3ba2f; color: #000; border-color: #f3ba2f;}
+
+        .btn-main { width: 100%; background: #2196F3; color: #fff; border: none; padding: 18px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4); margin-top: 10px;}
+        .btn-main:active { transform: scale(0.98); }
+
+        .note { text-align: center; font-size: 11px; color: #a0a5b1; margin-top: 15px; line-height: 1.5;}
+
+        /* 🔥 NEW: History Box 🔥 */
+        .history-box { background: #151a25; border: 1px solid #2a2f3a; border-radius: 15px; padding: 20px;}
+        .hist-title { color: #f3ba2f; font-size: 14px; text-transform: uppercase; font-weight: bold; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px;}
+        .hist-row { display: flex; justify-content: space-between; align-items: center; background: #0b0e14; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #00ff88;}
+        .hist-info p { font-size: 13px; color: #fff; font-weight: bold; margin-bottom: 3px;}
+        .hist-info small { font-size: 10px; color: #a0a5b1;}
+        .hist-amt { font-size: 16px; color: #00ff88; font-weight: bold;}
+        .hist-status { font-size: 11px; background: rgba(0,255,136,0.1); color: #00ff88; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 5px;}
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(243,186,47,0.4); } 70% { box-shadow: 0 0 0 15px rgba(243,186,47,0); } 100% { box-shadow: 0 0 0 0 rgba(243,186,47,0); } }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1X3E6WPLXn1HTWvcP25yUBmKlvraiHHs",
+            authDomain: "smart-earn-459ec.firebaseapp.com",
+            projectId: "smart-earn-459ec",
+            storageBucket: "smart-earn-459ec.firebasestorage.app",
+            messagingSenderId: "314834673807",
+            appId: "1:314834673807:web:ac9246bae8910ec57550fa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">⚡ Smart Earn</div>
+        <button class="back-btn" onclick="window.location.href='game.html'">🔙 Back</button>
+    </header>
+
+    <div class="container">
+        
+        <div class="bonus-banner">
+            <h3 id="banner-title">🎁 First Deposit Offers</h3>
+            <p id="banner-desc">Get extra Game Bonus on your deposit!</p>
+            <div class="offers-grid">
+                <div class="offer-box" id="offer-299">Deposit ₹299 <span>+₹30</span></div>
+                <div class="offer-box" id="offer-500">Deposit ₹500 <span>+₹50</span></div>
+                <div class="offer-box">Deposit ₹1000 <span>+₹100</span></div>
+                <div class="offer-box mega">Deposit ₹5000 <span>+₹600</span></div>
+                <div class="offer-box mega">Deposit ₹10000 <span>+₹1500</span></div>
+            </div>
+        </div>
+
+        <div class="deposit-card">
+            <div class="section-title">Step 1: Pay to UPI ID</div>
+            <div class="upi-box">
+                <div class="upi-id" id="upi-id">smartearn@ybl</div>
+                <button class="copy-btn" onclick="copyUPI()">Copy UPI ID</button>
+            </div>
+
+            <div class="section-title">Step 2: Submit Details</div>
+            <div class="input-group">
+                <label>Deposit Amount</label>
+                <div class="amt-input-wrapper">
+                    <span>₹</span>
+                    <input type="number" id="dep-amt" class="custom-input" placeholder="0" min="299">
+                </div>
+                <div class="quick-amts">
+                    <button class="q-btn" onclick="setAmt(299)">₹299</button>
+                    <button class="q-btn" onclick="setAmt(500)">₹500</button>
+                    <button class="q-btn" onclick="setAmt(1000)">₹1000</button>
+                    <button class="q-btn" onclick="setAmt(5000)">₹5000</button>
+                    <button class="q-btn" onclick="setAmt(10000)">₹10000</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>12-Digit UTR / Ref. Number</label>
+                <input type="number" id="dep-utr" class="custom-input" style="border: 1px solid #2a2f3a; border-radius: 10px; width: 100%;" placeholder="e.g. 312345678901">
+            </div>
+
+            <div class="input-group">
+                <label>Upload Payment Screenshot</label>
+                <input type="file" id="dep-screenshot" class="file-input" accept="image/*">
+            </div>
+
+            <button class="btn-main" id="submit-btn" onclick="submitDeposit()">Verify & Add Funds</button>
+            <p class="note">⚠️ Bonus amount can only be used to play games and cannot be withdrawn directly.</p>
+        </div>
+
+        <div class="history-box">
+            <div class="hist-title">📄 Recent Deposits</div>
+            <div id="deposit-history-list">
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        let userData = {};
+
+        window.onload = function() {
+            let saved = localStorage.getItem('smartEarnUser');
+            if(!saved) { window.location.href = "index.html"; return; }
+            userData = JSON.parse(saved);
+
+            if(!userData.depositHistory) userData.depositHistory = [];
+
+            if(userData.firstDepositDone === true) {
+                document.getElementById('offer-299').style.display = 'none';
+                document.getElementById('offer-500').style.display = 'none';
+                document.getElementById('banner-title').innerText = "🎁 Permanent Offers";
+                document.getElementById('banner-desc').innerText = "Get mega Game Bonus on big deposits!";
+            }
+
+            renderHistory();
+        };
+
+        function setAmt(val) { document.getElementById('dep-amt').value = val; }
+        function copyUPI() { navigator.clipboard.writeText(document.getElementById('upi-id').innerText); alert("✅ UPI ID Copied!"); }
+
+        function renderHistory() {
+            let list = document.getElementById('deposit-history-list');
+            list.innerHTML = "";
+            if(userData.depositHistory.length === 0) {
+                list.innerHTML = "<p style='text-align:center; color:#a0a5b1; font-size:12px;'>No deposits yet.</p>";
+                return;
+            }
+
+            // Reverse loop to show newest first
+            for(let i = userData.depositHistory.length - 1; i >= 0; i--) {
+                let tx = userData.depositHistory[i];
+                list.innerHTML += `
+                <div class="hist-row">
+                    <div class="hist-info">
+                        <p>Deposit via UPI</p>
+                        <small>UTR: ${tx.utr}</small><br>
+                        <small>${tx.date}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="hist-amt">+₹${tx.amount}</div>
+                        <div class="hist-status">✅ Success</div>
+                    </div>
+                </div>`;
+            }
+        }
+
+        function submitDeposit() {
+            let amt = parseFloat(document.getElementById('dep-amt').value);
+            let utr = document.getElementById('dep-utr').value;
+            let screenshot = document.getElementById('dep-screenshot').value;
+
+            if(isNaN(amt) || amt < 299) return alert("❌ Minimum deposit amount is ₹299.");
+            if(utr.length !== 12) return alert("❌ Please enter a valid 12-Digit UTR Number.");
+            if(!screenshot) return alert("❌ Please upload the payment screenshot.");
+
+            let btn = document.getElementById('submit-btn');
+            btn.innerText = "⏳ Verifying Payment...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                let bonusAmount = 0;
+                if(amt >= 10000) bonusAmount = 1500;
+                else if(amt >= 5000) bonusAmount = 600;
+                else if(amt >= 1000) bonusAmount = 100;
+                else if(amt >= 500 && userData.firstDepositDone === false) bonusAmount = 50;
+                else if(amt >= 299 && userData.firstDepositDone === false) bonusAmount = 30;
+
+                userData.firstDepositDone = true;
+                userData.lockedBonus = (userData.lockedBonus || 0) + bonusAmount;
+                userData.hasDeposited = true; 
+                userData.inrBalance += (amt + bonusAmount);
+
+                // 🔥 Save to History 🔥
+                let dateStr = new Date().toLocaleString();
+                userData.depositHistory.push({ amount: amt, utr: utr, date: dateStr, status: "Success" });
+                
+                // 🔥 FIREBASE UPDATE LOGIC 🔥
+                if(userData.phone) {
+                    db.ref('users/' + userData.phone).set(userData).then(() => {
+                        localStorage.setItem('smartEarnUser', JSON.stringify(userData));
+                        renderHistory(); // Update UI immediately
+                        if(bonusAmount > 0) alert(`🎉 SUCCESS!\n\n₹${amt} Added to Wallet.\n+ ₹${bonusAmount} Game Bonus Added!`);
+                        else alert(`✅ SUCCESS!\n\n₹${amt} Added to your Wallet.`);
+                        window.location.href = "game.html"; 
+                    });
+                } else {
+                    // Fallback
+                    localStorage.setItem('smartEarnUser', JSON.stringify(userData));
+                    renderHistory(); 
+                    if(bonusAmount > 0) alert(`🎉 SUCCESS!\n\n₹${amt} Added to Wallet.\n+ ₹${bonusAmount} Game Bonus Added!`);
+                    else alert(`✅ SUCCESS!\n\n₹${amt} Added to your Wallet.`);
+                    window.location.href = "game.html";
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
