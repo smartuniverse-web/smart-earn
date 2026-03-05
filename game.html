@@ -7,43 +7,54 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0e14; color: #e2e8f0; padding-bottom: 70px; } 
+
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #151a25; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0; z-index: 100;}
         .logo { font-weight: bold; color: #f3ba2f; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;}
+        
         .header-right { display: flex; gap: 10px; align-items: center;}
         .profile-btn { background: rgba(243, 186, 47, 0.1); color: #f3ba2f; border: 1px solid #f3ba2f; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 12px;}
         .gift-btn { background: linear-gradient(135deg, #ff4d4d, #d50000); color: #fff; border: none; padding: 8px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; animation: blink 2s infinite; box-shadow: 0 0 10px rgba(255,77,77,0.5);}
+
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+
         .wallet-card { background: linear-gradient(135deg, #151a25, #1a1608); border: 1px solid #f3ba2f; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
         .bal-amt { color: #00ff88; font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.3); }
         .wallet-actions { display: flex; gap: 10px; }
         .action-btn-sm { padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px; border: none; text-transform: uppercase;}
         .btn-dep { background: #f3ba2f; color: #000; box-shadow: 0 4px 10px rgba(243,186,47,0.3); }
         .btn-wit { background: transparent; color: #fff; border: 1px solid #a0a5b1; }
+
         .time-tabs { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px;}
         .tab-btn { background: #151a25; border: 1px solid #2a2f3a; color: #a0a5b1; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; position: relative; font-size: 13px; text-align: center; transition: 0.3s;}
         .tab-btn.active { background: #2a2f3a; color: #f3ba2f; border-color: #f3ba2f; }
         .global-timer-badge { position: absolute; top: -8px; right: -5px; background: #ff4d4d; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold;}
+
         .thin-strip { background: #151a25; border: 1px solid #2a2f3a; border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
         .crypto-selector select { background: transparent; border: 1px solid #f3ba2f; color: #f3ba2f; padding: 5px; border-radius: 5px; font-weight: bold; font-size: 12px; outline: none; cursor: pointer; max-width: 100px;}
         .live-price { font-size: 22px; color: #00ff88; font-weight: bold; transition: color 0.3s; text-align: center; flex: 1;}
         .live-price.down { color: #ff4d4d; }
         .main-timer { font-size: 18px; color: #fff; font-weight: bold; background: #2a2f3a; padding: 4px 10px; border-radius: 5px; border: 1px solid #f3ba2f;}
         .main-timer.warning { color: #ff4d4d; border-color: #ff4d4d; animation: blink 1s infinite; }
+
         .number-title { color: #a0a5b1; font-size: 12px; text-transform: uppercase; font-weight: bold; text-align: center; margin-bottom: 10px;}
         .number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 25px;}
         .num-btn { background: #151a25; border: 1px solid #2a2f3a; color: #fff; font-size: 20px; font-weight: bold; padding: 15px 0; border-radius: 8px; cursor: pointer; transition: 0.1s;}
         .num-btn:active { background: #f3ba2f; color: #000; transform: scale(0.95);}
+
         .action-buttons { display: flex; gap: 15px; margin-bottom: 30px;}
         .action-btn { flex: 1; padding: 20px; border: none; border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.1s; }
         .btn-up { background: linear-gradient(180deg, #00e676, #00a152); box-shadow: 0 6px 0 #00733b; }
         .btn-up:active { transform: translateY(6px); box-shadow: 0 0 0 #00733b; }
         .btn-down { background: linear-gradient(180deg, #ff5252, #d50000); box-shadow: 0 6px 0 #9b0000; }
         .btn-down:active { transform: translateY(6px); box-shadow: 0 0 0 #9b0000; }
+
         .live-bets { background: #151a25; border: 1px solid #2a2f3a; border-radius: 12px; padding: 15px; overflow: hidden;}
         .bets-tabs-container { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px;}
         .b-tab { background: transparent; color: #a0a5b1; border: none; padding: 5px 10px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: 0.3s;}
         .b-tab.active { color: #f3ba2f; border-bottom: 2px solid #f3ba2f; }
         .live-bets-container { max-height: 250px; overflow-y: auto; position: relative; padding-right: 5px; scroll-behavior: smooth;}
+        .live-bets-container::-webkit-scrollbar { width: 4px; }
+        .live-bets-container::-webkit-scrollbar-thumb { background: #2a2f3a; border-radius: 4px; }
         .bet-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: #0b0e14; border-radius: 8px; border-left: 3px solid #2a2f3a; font-size: 13px; animation: slideDown 0.3s ease-out; }
         .bet-row.my-bet { background: rgba(243,186,47,0.1); border-left: 3px solid #f3ba2f;}
         .bet-user { color: #a0a5b1; font-weight: bold; width: 30%;}
@@ -53,10 +64,12 @@
         .bet-dir.up { color: #00ff88; }
         .bet-dir.down { color: #ff4d4d; }
         .bet-dir.num { color: #f3ba2f; font-size: 15px;}
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #151a25; border-top: 1px solid #2a2f3a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000;}
         .nav-item { text-align: center; color: #a0a5b1; font-size: 11px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase;}
         .nav-item.active { color: #f3ba2f; }
         .nav-icon { font-size: 22px; margin-bottom: 3px; display: block;}
+
         .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
         .popup-box { background: #151a25; border: 1px solid #2a2f3a; width: 90%; max-width: 350px; border-radius: 15px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: popUp 0.3s ease-out;}
         .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px;}
@@ -71,10 +84,12 @@
         .popup-actions { display: flex; gap: 10px; }
         .btn-cancel { flex: 1; background: transparent; color: #a0a5b1; border: 1px solid #a0a5b1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase;}
         .btn-done { flex: 1; background: #2196F3; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase;}
+
         .win-popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; }
         .win-popup { background: radial-gradient(circle, #2a2f3a 0%, #151a25 100%); border: 2px solid #f3ba2f; padding: 30px; border-radius: 20px; text-align: center; animation: popUp 0.5s; }
         .win-popup h1 { color: #00ff88; font-size: 35px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0,255,136,0.6);}
         .profit-amt { font-size: 40px; color: #f3ba2f; font-weight: bold; margin: 10px 0;}
+
         @keyframes slideDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes blink { 50% { opacity: 0; } }
@@ -86,7 +101,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyC1X3E6WPLXn1HTWvcP25yUBmKlvraiHHs",
             authDomain: "smart-earn-459ec.firebaseapp.com",
-            databaseURL: "https://smart-earn-459ec-default-rtdb.firebaseio.com",
+            databaseURL: "https://smart-earn-459ec-default-rtdb.firebaseio.com", 
             projectId: "smart-earn-459ec",
             storageBucket: "smart-earn-459ec.firebasestorage.app",
             messagingSenderId: "314834673807",
@@ -97,6 +112,7 @@
     </script>
 </head>
 <body>
+
     <header>
         <div class="logo">⚡ Smart Earn</div>
         <div class="header-right">
@@ -104,7 +120,9 @@
             <div class="profile-btn" id="user-id-btn">ID: Loading...</div>
         </div>
     </header>
+
     <div class="container">
+        
         <div class="wallet-card">
             <div>
                 <div class="wallet-title">Balance</div>
@@ -115,11 +133,13 @@
                 <button class="action-btn-sm btn-wit" onclick="window.location.href='withdraw.html'">Withdraw</button>
             </div>
         </div>
+
         <div class="time-tabs">
             <button class="tab-btn" id="tab-15" onclick="selectTab(15)">15s Blitz <span class="global-timer-badge" id="badge-15">15s</span></button>
             <button class="tab-btn active" id="tab-30" onclick="selectTab(30)">30s Rapid <span class="global-timer-badge" id="badge-30">30s</span></button>
             <button class="tab-btn" id="tab-60" onclick="selectTab(60)">60s Pro <span class="global-timer-badge" id="badge-60">60s</span></button>
         </div>
+
         <div class="thin-strip">
             <div class="crypto-selector">
                 <select id="asset-select" onchange="changeCrypto()">
@@ -133,6 +153,7 @@
             <div class="live-price" id="price-ticker">53,45,230</div>
             <div class="main-timer" id="main-display-timer">00:30</div>
         </div>
+
         <div class="number-title">Play Numbers (Win 5x Profit)</div>
         <div class="number-grid">
             <button class="num-btn" onclick="openBetPopup('NUM', 0)">0</button>
@@ -146,10 +167,12 @@
             <button class="num-btn" onclick="openBetPopup('NUM', 8)">8</button>
             <button class="num-btn" onclick="openBetPopup('NUM', 9)">9</button>
         </div>
+
         <div class="action-buttons">
             <button class="action-btn btn-up" onclick="openBetPopup('DIR', 'UP')">📈 UP</button>
             <button class="action-btn btn-down" onclick="openBetPopup('DIR', 'DOWN')">📉 DOWN</button>
         </div>
+
         <div class="live-bets">
             <div class="bets-tabs-container">
                 <button class="b-tab active" id="btab-global" onclick="switchBetTab('global')">🔴 Global Bets</button>
@@ -158,7 +181,9 @@
             <div class="live-bets-container" id="global-bets-list"></div>
             <div class="live-bets-container" id="my-bets-list" style="display: none;"></div>
         </div>
+
     </div>
+
     <div class="bottom-nav">
         <div class="nav-item active" onclick="window.location.href='game.html'">
             <span class="nav-icon">🎮</span>Game
@@ -173,6 +198,7 @@
             <span class="nav-icon">👤</span>Menu
         </div>
     </div>
+
     <div class="popup-overlay" id="bet-popup">
         <div class="popup-box">
             <div class="popup-header">
@@ -197,6 +223,7 @@
             </div>
         </div>
     </div>
+
     <div class="win-popup-overlay" id="win-overlay">
         <div class="win-popup">
             <h1>🎉 MEGA WIN 🎉</h1>
@@ -204,6 +231,7 @@
             <div class="profit-amt" id="win-amt">+₹0.00</div>
         </div>
     </div>
+
     <script>
         let userData = {};
         let basePrice = 5345230; 
@@ -212,21 +240,32 @@
         let currentBetType = "";
         let currentBetValue = "";
         let winMultiplier = 1.9; 
+
+        // 🔥 NEW: Global Sync & Admin Controls Data 🔥
         let currentRoundIds = { 15: 0, 30: 0, 60: 0 };
         let adminGameControls = { 15: {}, 30: {}, 60: {} };
+
         window.onload = function() {
             let saved = localStorage.getItem('smartEarnUser');
             if(!saved) { window.location.href = "index.html"; return; }
             userData = JSON.parse(saved);
+            
             if(!userData.gameHistory) userData.gameHistory = [];
-            if(!userData.hookWins) userData.hookWins = 0; 
+            if(!userData.hookWins) userData.hookWins = 0; // NEW: Hook Tracker
+
             document.getElementById('user-id-btn').innerText = "ID: " + userData.myRefCode;
             updateBalanceUI();
+            
+            // 🔥 START GLOBAL INTERNET TIMER 🔥
             startPerfectGlobalTimers();
             startFakeBots();
+
+            // 🔥 Listen to Admin Controls 🔥
             db.ref('game_controls').on('value', snap => {
                 if(snap.val()) adminGameControls = snap.val();
             });
+
+            // Listen to Real-time Balance & Status
             if(userData.phone) {
                 db.ref('users/' + userData.phone).on('value', (snapshot) => {
                     if(snapshot.exists()) {
@@ -244,11 +283,13 @@
                 });
             }
         };
+
         function updateBalanceUI() {
             document.getElementById('user-inr').innerText = "₹" + userData.inrBalance.toFixed(2);
             localStorage.setItem('smartEarnUser', JSON.stringify(userData));
             if(userData.phone) { db.ref('users/' + userData.phone).update({ inrBalance: userData.inrBalance, hookWins: userData.hookWins }).catch(e=>{}); }
         }
+
         function dailyCheckIn() {
             let today = new Date().toDateString();
             if(userData.lastCheckIn === today) return alert("❌ You have already claimed today's bonus!\nCome back tomorrow.");
@@ -260,7 +301,9 @@
             updateBalanceUI();
             alert(`🎁 Day ${userData.checkInDay} Check-in Successful!\n\n+₹${bonus} added to your Main Wallet directly.`);
         }
+
         function changeCrypto() { basePrice = parseFloat(document.getElementById('asset-select').value); }
+
         setInterval(() => {
             let change = (Math.random() * 2000) - 1000; 
             if(basePrice < 100) change = (Math.random() * 2) - 1; 
@@ -270,27 +313,35 @@
             else priceEl.innerText = basePrice.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             if(change < 0) priceEl.classList.add('down'); else priceEl.classList.remove('down');
         }, 800);
+
+        // 🔥 NEW: PERFECT GLOBAL INTERNET TIMER 🔥
         function startPerfectGlobalTimers() {
             setInterval(() => {
-                let nowUnix = Math.floor(Date.now() / 1000); 
+                let nowUnix = Math.floor(Date.now() / 1000); // Global Internet Second
+                
                 [15, 30, 60].forEach(t => {
                     let elapsedInCycle = nowUnix % t;
                     let remaining = t - elapsedInCycle;
                     if(remaining === t) remaining = 0; 
-                    let currentRoundId = nowUnix - elapsedInCycle; 
+                    
+                    let currentRoundId = nowUnix - elapsedInCycle; // Unique Round ID
+
                     if(selectedTab === t) {
                         let mainTimerEl = document.getElementById('main-display-timer');
                         mainTimerEl.innerText = `00:${remaining < 10 ? '0'+remaining : remaining}`;
                         if(remaining <= 5 && remaining > 0) mainTimerEl.classList.add('warning');
                         else mainTimerEl.classList.remove('warning');
                     }
+
+                    // Resolve exactly when round changes
                     if (currentRoundIds[t] !== 0 && currentRoundIds[t] !== currentRoundId) {
                         resolveRound(t);
                     }
                     currentRoundIds[t] = currentRoundId;
                 });
-            }, 500); 
+            }, 500); // Check every half second for perfect sync
         }
+
         function selectTab(seconds) {
             selectedTab = seconds;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -299,34 +350,47 @@
             let rem = seconds - (nowUnix % seconds);
             document.getElementById('main-display-timer').innerText = `00:${rem < 10 ? '0'+rem : rem}`;
         }
+
         function openBetPopup(type, value) {
             let nowUnix = Math.floor(Date.now() / 1000);
             let rem = selectedTab - (nowUnix % selectedTab);
             if(rem <= 5) return alert(`⏳ BETTING CLOSED! Please wait for new round.`);
+            
             currentBetType = type; currentBetValue = value;
             document.getElementById('popup-title').innerText = type === 'DIR' ? value : `Number ${value}`;
             winMultiplier = type === 'DIR' ? 1.9 : 5.0;
             document.getElementById('popup-amt').value = 10; calculateWin();
             document.getElementById('bet-popup').style.display = "flex";
         }
+
         function closeBetPopup() { document.getElementById('bet-popup').style.display = "none"; }
         function multiplyAmount(factor) { let input = document.getElementById('popup-amt'); input.value = (parseFloat(input.value) || 10) * factor; calculateWin(); }
         function calculateWin() { let amt = parseFloat(document.getElementById('popup-amt').value) || 0; document.getElementById('est-win').innerText = `Win: ₹${(amt * winMultiplier).toFixed(2)}`; }
+
         function confirmBet() {
             let amt = parseFloat(document.getElementById('popup-amt').value);
             if(isNaN(amt) || amt < 10) return alert("Minimum bet is ₹10!");
             if(amt > userData.inrBalance) return alert("Insufficient Balance! Please deposit.");
             userData.inrBalance -= amt; updateBalanceUI();
+
             let betId = 'bet-' + Date.now() + Math.floor(Math.random()*1000);
             activeUserBets[selectedTab].push({ id: betId, type: currentBetType, value: currentBetValue, amount: amt });
             addMyBetRow(betId, currentBetType === 'DIR' ? currentBetValue : "No. " + currentBetValue, amt);
+            
+            // 🔥 LIVE ADMIN POOL SYNC 🔥
             let poolKey = currentBetType === 'DIR' ? currentBetValue : 'NUM_' + currentBetValue;
             db.ref(`live_pools/${selectedTab}/${poolKey}`).transaction(val => (val || 0) + amt);
+
+            // 🔥 REAL-TIME COMMISSION DISTRIBUTION 🔥
             distributeCommission(amt);
+
             switchBetTab('my'); closeBetPopup();
         }
+
+        // 🔥 NEW: REAL-TIME REFERRAL COMMISSION 🔥
         function distributeCommission(betAmt) {
             if(!userData.sponsoredBy) return;
+            // Level 1 (Direct - 1%)
             db.ref('users').orderByChild('myRefCode').equalTo(userData.sponsoredBy).once('value', snap => {
                 let lvl1 = snap.val();
                 if(lvl1) {
@@ -334,6 +398,8 @@
                     let comm1 = betAmt * 0.01;
                     db.ref(`users/${l1Key}/inrBalance`).transaction(b => (b||0) + comm1);
                     db.ref(`users/${l1Key}/referralEarnings`).transaction(c => (c||0) + comm1);
+
+                    // Level 2 (All Team - 0.1%)
                     let l1Data = lvl1[l1Key];
                     if(l1Data.sponsoredBy) {
                         db.ref('users').orderByChild('myRefCode').equalTo(l1Data.sponsoredBy).once('value', snap2 => {
@@ -349,23 +415,31 @@
                 }
             });
         }
+
+        // 🔥 THE MASTER ENGINE: Admin Override & Hook Logic 🔥
         function resolveRound(timeframe) {
             let bets = activeUserBets[timeframe];
             if(bets.length > 0) {
                 let totalUp = 0; let totalDown = 0;
                 let numBets = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
+
                 bets.forEach(b => {
                     if(b.type === 'DIR') { if(b.value === 'UP') totalUp += b.amount; else totalDown += b.amount; } 
                     else if (b.type === 'NUM') { numBets[b.value] += b.amount; }
                 });
+
                 let winningDir = "UP";
                 let winningNum = 0;
+
+                // 1. AUTO LOGIC (Lowest Volume Wins)
                 winningDir = totalUp > totalDown ? "DOWN" : "UP";
                 let minNumAmt = Infinity;
                 for(let i=0; i<=9; i++) { if(numBets[i] < minNumAmt) minNumAmt = numBets[i]; }
                 let candNums = [];
                 for(let i=0; i<=9; i++) { if(numBets[i] === minNumAmt) candNums.push(i); }
                 winningNum = candNums[Math.floor(Math.random() * candNums.length)];
+
+                // 2. NEW USER HOOK LOGIC (First 2 Bets = 100% Win)
                 let isNewbie = userData.hookWins < 2;
                 if(isNewbie) {
                     let firstBet = bets[0]; 
@@ -373,16 +447,22 @@
                     if(firstBet.type === 'NUM') winningNum = firstBet.value;
                     userData.hookWins += 1;
                 }
+
+                // 3. ADMIN OVERRIDE (Highest Priority)
                 let fDir = adminGameControls[timeframe]?.force_dir || "AUTO";
                 let fNum = adminGameControls[timeframe]?.force_num || "AUTO";
                 if(fDir !== "AUTO") winningDir = fDir;
                 if(fNum !== "AUTO") winningNum = parseInt(fNum);
+
+                // EVALUATE
                 let userTotalWin = 0;
                 let dateStr = new Date().toLocaleString();
+
                 bets.forEach(bet => {
                     let isWin = false; let profit = 0;
                     if(bet.type === 'DIR' && bet.value === winningDir) { isWin = true; profit = bet.amount * 1.9; } 
                     else if(bet.type === 'NUM' && bet.value == winningNum) { isWin = true; profit = bet.amount * 5.0; }
+                    
                     let historyItem = {
                         date: dateStr, timeframe: timeframe,
                         betOn: bet.type === 'DIR' ? bet.value : "No. " + bet.value,
@@ -390,6 +470,7 @@
                         profit: isWin ? profit : 0
                     };
                     userData.gameHistory.push(historyItem); 
+
                     let row = document.getElementById(bet.id);
                     if(row) {
                         let statusEl = row.querySelector('.bet-status');
@@ -398,16 +479,20 @@
                     }
                     if(isWin) userTotalWin += profit;
                 });
+
                 if(userTotalWin > 0) { userData.inrBalance += userTotalWin; updateBalanceUI(); showWinPopup(userTotalWin); }
                 else { updateBalanceUI(); } 
+
                 activeUserBets[timeframe] = []; 
             }
         }
+
         function showWinPopup(amount) {
             document.getElementById('win-amt').innerText = "+₹" + amount.toFixed(2);
             document.getElementById('win-overlay').style.display = "flex";
             setTimeout(() => { document.getElementById('win-overlay').style.display = "none"; }, 3500);
         }
+
         function switchBetTab(tab) {
             document.getElementById('btab-global').classList.remove('active');
             document.getElementById('btab-my').classList.remove('active');
@@ -416,17 +501,20 @@
             if(tab === 'global') { document.getElementById('btab-global').classList.add('active'); document.getElementById('global-bets-list').style.display = 'block'; } 
             else { document.getElementById('btab-my').classList.add('active'); document.getElementById('my-bets-list').style.display = 'block'; }
         }
+
         function addMyBetRow(id, dirVal, amt) {
             let list = document.getElementById('my-bets-list');
             let dirHTML = dirVal === "UP" ? '<span class="bet-dir up">UP 📈</span>' : (dirVal === "DOWN" ? '<span class="bet-dir down">DOWN 📉</span>' : `<span class="bet-dir num">${dirVal} 🎯</span>`);
             list.insertAdjacentHTML('afterbegin', `<div class="bet-row my-bet" id="${id}"><span class="bet-user" style="color:#f3ba2f;">YOU</span><span class="bet-amt">₹${amt}</span>${dirHTML}<span class="bet-status" style="color:#a0a5b1;">⏳ Pending</span></div>`);
         }
+
         function startFakeBots() {
             setInterval(() => {
                 let fakeNames = ["Rahul**", "KingX", "Trader**09", "Win**34", "Pro**21", "Neha**77", "VIP**01"];
                 let amt = Math.floor(Math.random() * 89000) + 1000; 
                 let displayVal = Math.random() > 0.5 ? "No. " + Math.floor(Math.random() * 10) : (Math.random() > 0.5 ? "UP" : "DOWN");
                 let dirHTML = displayVal === "UP" ? '<span class="bet-dir up">UP 📈</span>' : (displayVal === "DOWN" ? '<span class="bet-dir down">DOWN 📉</span>' : `<span class="bet-dir num">${displayVal} 🎯</span>`);
+                
                 let list = document.getElementById('global-bets-list');
                 list.insertAdjacentHTML('afterbegin', `<div class="bet-row"><span class="bet-user">${fakeNames[Math.floor(Math.random() * fakeNames.length)]}</span><span class="bet-amt">₹${amt.toLocaleString('en-IN')}</span>${dirHTML}<span class="bet-status" style="color:#00ff88;">● Live</span></div>`);
                 if(list.children.length > 30) list.removeChild(list.lastChild);
