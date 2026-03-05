@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Earn - Withdraw Funds</title>
     <style>
+        /* CSS बिल्कुल वैसा ही है, एक डॉट भी चेंज नहीं हुआ */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0e14; color: #e2e8f0; }
+
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #151a25; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0; z-index: 100;}
         .logo { font-weight: bold; color: #f3ba2f; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;}
         .back-btn { background: transparent; color: #fff; border: 1px solid #2a2f3a; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold;}
+
         .container { max-width: 500px; margin: 0 auto; padding: 20px 15px; padding-bottom: 50px; }
+
         .balance-card { background: linear-gradient(135deg, #151a25, #1a1608); border: 1px solid #f3ba2f; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px;}
         .bal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #2a2f3a;}
         .bal-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
@@ -18,23 +22,29 @@
         .bal-val { font-size: 18px; color: #fff; font-weight: bold;}
         .highlight-val { color: #00ff88; font-size: 28px; text-shadow: 0 0 10px rgba(0,255,136,0.3);}
         .bonus-val { color: #ff4d4d;}
+
         .lock-warning { background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 20px; display: none;}
         .lock-warning h4 { color: #ff4d4d; margin-bottom: 5px; font-size: 16px;}
         .lock-warning p { color: #fff; font-size: 12px; margin-bottom: 10px;}
         .btn-dep-small { background: #f3ba2f; color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;}
+
         .withdraw-box { background: #151a25; border: 1px solid #2a2f3a; border-radius: 15px; padding: 20px; margin-bottom: 25px;}
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; font-size: 12px; color: #a0a5b1; margin-bottom: 8px; text-transform: uppercase; font-weight: bold;}
+        
         .amt-input-wrapper { display: flex; align-items: center; background: #0b0e14; border: 1px solid #2a2f3a; border-radius: 10px; overflow: hidden; }
         .amt-input-wrapper span { padding: 15px; color: #00ff88; font-weight: bold; font-size: 18px; background: #1a202c;}
         .custom-input { flex: 1; background: transparent; border: none; padding: 15px; color: #fff; font-size: 18px; font-weight: bold; outline: none; }
+        
         .method-tabs { display: flex; gap: 10px; margin-bottom: 15px;}
         .m-tab { flex: 1; background: #0b0e14; border: 1px solid #2a2f3a; color: #a0a5b1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.3s;}
         .m-tab.active { background: #2a2f3a; color: #f3ba2f; border-color: #f3ba2f;}
+
         .btn-main { width: 100%; background: #00e676; color: #000; border: none; padding: 18px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0, 230, 118, 0.3); margin-top: 10px;}
         .btn-main:active { transform: scale(0.98); }
         .btn-main:disabled { background: #2a2f3a; color: #a0a5b1; box-shadow: none; cursor: not-allowed;}
         .note { text-align: center; font-size: 11px; color: #a0a5b1; margin-top: 15px; line-height: 1.5;}
+
         .history-box { background: #151a25; border: 1px solid #2a2f3a; border-radius: 15px; padding: 20px;}
         .hist-title { color: #f3ba2f; font-size: 14px; text-transform: uppercase; font-weight: bold; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px;}
         .hist-row { display: flex; justify-content: space-between; align-items: center; background: #0b0e14; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #f3ba2f;}
@@ -61,6 +71,229 @@
     </script>
 </head>
 <body>
-    <header><div class="logo">⚡ Smart Earn</div><button class="back-btn" onclick="window.location.href='game.html'">🔙 Back</button></header>
-    </body>
+
+    <header>
+        <div class="logo">⚡ Smart Earn</div>
+        <button class="back-btn" onclick="window.location.href='game.html'">🔙 Back</button>
+    </header>
+
+    <div class="container">
+        
+        <div class="balance-card">
+            <div class="bal-row">
+                <span class="bal-label">Total Balance</span>
+                <span class="bal-val" id="total-bal">₹0.00</span>
+            </div>
+            <div class="bal-row">
+                <span class="bal-label">Locked Game Bonus 🔒</span>
+                <span class="bal-val bonus-val" id="locked-bal">- ₹0.00</span>
+            </div>
+            <div class="bal-row" style="margin-top: 10px; border: none;">
+                <span class="bal-label" style="color: #f3ba2f;">Withdrawable Amount</span>
+                <span class="bal-val highlight-val" id="withdrawable-bal">₹0.00</span>
+            </div>
+        </div>
+
+        <div class="lock-warning" id="lock-warning">
+            <h4>🔒 Withdrawal Locked</h4>
+            <p>You need to make at least one deposit to unlock withdrawals and verify your account.</p>
+            <button class="btn-dep-small" onclick="window.location.href='deposit.html'">Deposit Now</button>
+        </div>
+
+        <div class="withdraw-box">
+            <div class="input-group">
+                <label>Withdrawal Amount (Min ₹499)</label>
+                <div class="amt-input-wrapper">
+                    <span>₹</span>
+                    <input type="number" id="wit-amt" class="custom-input" placeholder="0" min="499">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Withdrawal Method</label>
+                <div class="method-tabs">
+                    <button class="m-tab active" id="tab-upi" onclick="switchMethod('UPI')">UPI ID</button>
+                    <button class="m-tab" id="tab-bank" onclick="switchMethod('BANK')">Bank Transfer</button>
+                </div>
+            </div>
+
+            <div class="input-group" id="upi-input-group">
+                <label>Enter Your UPI ID</label>
+                <input type="text" id="wit-upi" class="custom-input" style="border: 1px solid #2a2f3a; border-radius: 10px; width: 100%;" placeholder="e.g. 9876543210@ybl">
+            </div>
+
+            <div class="input-group" id="bank-input-group" style="display: none;">
+                <label>Bank Account Number</label>
+                <input type="number" id="wit-acc" class="custom-input" style="border: 1px solid #2a2f3a; border-radius: 10px; width: 100%; margin-bottom: 10px;" placeholder="Account Number">
+                <label>IFSC Code</label>
+                <input type="text" id="wit-ifsc" class="custom-input" style="border: 1px solid #2a2f3a; border-radius: 10px; width: 100%;" placeholder="e.g. SBIN0001234">
+            </div>
+
+            <button class="btn-main" id="submit-btn" onclick="submitWithdraw()">Submit Request</button>
+            <p class="note">⚠️ Withdrawals are processed within 2-4 hours. Make sure your details are correct.</p>
+        </div>
+
+        <div class="history-box">
+            <div class="hist-title">📄 Recent Withdrawals</div>
+            <div id="withdraw-history-list"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let userData = {};
+        let withdrawableAmt = 0;
+        let selectedMethod = "UPI";
+
+        window.onload = function() {
+            let saved = localStorage.getItem('smartEarnUser');
+            if(!saved) { window.location.href = "index.html"; return; }
+            userData = JSON.parse(saved);
+
+            if(!userData.withdrawHistory) userData.withdrawHistory = [];
+
+            calculateBalance();
+            renderHistory();
+
+            // 🔥 NEW: REAL-TIME ADMIN SYNC 🔥 (पेज को रिफ्रेश किये बिना एडमिन के एक्शन को सुनना)
+            if(userData.phone) {
+                db.ref('users/' + userData.phone).on('value', (snapshot) => {
+                    if(snapshot.exists()) {
+                        userData = snapshot.val();
+                        if(!userData.withdrawHistory) userData.withdrawHistory = [];
+                        localStorage.setItem('smartEarnUser', JSON.stringify(userData));
+                        
+                        calculateBalance(); // बैलेंस अपडेट
+                        renderHistory();    // अप्रूव/रिजेक्ट स्टेटस अपडेट
+                    }
+                });
+            }
+        };
+
+        function calculateBalance() {
+            let totalLockedBonus = (userData.lockedBonus || 0) + 50; 
+            
+            document.getElementById('total-bal').innerText = "₹" + (userData.inrBalance || 0).toFixed(2);
+            document.getElementById('locked-bal').innerText = "- ₹" + totalLockedBonus.toFixed(2);
+
+            withdrawableAmt = (userData.inrBalance || 0) - totalLockedBonus;
+            if(withdrawableAmt < 0) withdrawableAmt = 0;
+
+            document.getElementById('withdrawable-bal').innerText = "₹" + withdrawableAmt.toFixed(2);
+
+            if(userData.hasDeposited !== true) {
+                document.getElementById('lock-warning').style.display = "block";
+                document.getElementById('submit-btn').disabled = true;
+                document.getElementById('submit-btn').innerText = "Locked";
+            } else {
+                document.getElementById('lock-warning').style.display = "none";
+                document.getElementById('submit-btn').disabled = false;
+                document.getElementById('submit-btn').innerText = "Submit Request";
+            }
+        }
+
+        function switchMethod(method) {
+            selectedMethod = method;
+            document.getElementById('tab-upi').classList.remove('active');
+            document.getElementById('tab-bank').classList.remove('active');
+            document.getElementById('upi-input-group').style.display = 'none';
+            document.getElementById('bank-input-group').style.display = 'none';
+
+            if(method === 'UPI') {
+                document.getElementById('tab-upi').classList.add('active');
+                document.getElementById('upi-input-group').style.display = 'block';
+            } else {
+                document.getElementById('tab-bank').classList.add('active');
+                document.getElementById('bank-input-group').style.display = 'block';
+            }
+        }
+
+        function renderHistory() {
+            let list = document.getElementById('withdraw-history-list');
+            list.innerHTML = "";
+            if(userData.withdrawHistory.length === 0) {
+                list.innerHTML = "<p style='text-align:center; color:#a0a5b1; font-size:12px;'>No withdrawals yet.</p>";
+                return;
+            }
+
+            for(let i = userData.withdrawHistory.length - 1; i >= 0; i--) {
+                let tx = userData.withdrawHistory[i];
+                let desc = tx.method === "UPI" ? `UPI: ${tx.detail}` : `Bank Acc: ${tx.detail}`;
+                
+                // 🔥 NEW: Dynamic Status Color 🔥
+                let statusBadge = `<div class="hist-status">⏳ Pending</div>`;
+                if(tx.status === "Approved") {
+                    statusBadge = `<div class="hist-status" style="color:#00ff88; background:rgba(0,255,136,0.1);">✅ Approved</div>`;
+                } else if(tx.status === "Rejected") {
+                    statusBadge = `<div class="hist-status" style="color:#ff4d4d; background:rgba(255,77,77,0.1);">❌ Rejected</div>`;
+                }
+                
+                list.innerHTML += `
+                <div class="hist-row">
+                    <div class="hist-info">
+                        <p>Withdraw to ${tx.method}</p>
+                        <small>${desc}</small><br>
+                        <small>${tx.date}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="hist-amt">-₹${tx.amount}</div>
+                        ${statusBadge}
+                    </div>
+                </div>`;
+            }
+        }
+
+        function submitWithdraw() {
+            let amt = parseFloat(document.getElementById('wit-amt').value);
+
+            if(isNaN(amt) || amt < 499) return alert("❌ Minimum withdrawal amount is ₹499.");
+            if(amt > withdrawableAmt) return alert("❌ Insufficient Withdrawable Balance!\n\nYou cannot withdraw the Game Bonus.");
+
+            let detail = "";
+            if(selectedMethod === 'UPI') {
+                detail = document.getElementById('wit-upi').value;
+                if(detail.length < 5 || !detail.includes('@')) return alert("❌ Please enter a valid UPI ID.");
+            } else {
+                let acc = document.getElementById('wit-acc').value;
+                let ifsc = document.getElementById('wit-ifsc').value;
+                if(acc.length < 8 || ifsc.length < 4) return alert("❌ Please enter valid Bank Details.");
+                detail = acc; // Record account number in history
+            }
+
+            let btn = document.getElementById('submit-btn');
+            btn.innerText = "⏳ Processing...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                userData.inrBalance -= amt;
+
+                let dateStr = new Date().toLocaleString();
+                userData.withdrawHistory.push({ amount: amt, method: selectedMethod, detail: detail, date: dateStr, status: "Pending" });
+
+                if(userData.phone) {
+                    db.ref('users/' + userData.phone).set(userData).then(() => {
+                        localStorage.setItem('smartEarnUser', JSON.stringify(userData));
+                        
+                        renderHistory();
+                        calculateBalance();
+
+                        alert(`✅ WITHDRAWAL REQUESTED!\n\n₹${amt} will be credited to your ${selectedMethod} within 2-4 hours.`);
+                        
+                        btn.innerText = "Submit Request";
+                        btn.disabled = false;
+                        document.getElementById('wit-amt').value = '';
+                    });
+                } else {
+                    localStorage.setItem('smartEarnUser', JSON.stringify(userData));
+                    renderHistory();
+                    calculateBalance();
+                    alert(`✅ WITHDRAWAL REQUESTED!\n\n₹${amt} will be credited to your ${selectedMethod} within 2-4 hours.`);
+                    btn.innerText = "Submit Request";
+                    btn.disabled = false;
+                    document.getElementById('wit-amt').value = '';
+                }
+            }, 1500);
+        }
+    </script>
+</body>
 </html>
