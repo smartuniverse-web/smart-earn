@@ -7,51 +7,37 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0e14; color: #e2e8f0; padding-bottom: 70px;}
-
         header { padding: 15px 20px; background-color: #151a25; border-bottom: 1px solid #2a2f3a; text-align: center; position: sticky; top: 0; z-index: 100;}
         .logo { font-weight: bold; color: #f3ba2f; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;}
-
         .container { max-width: 600px; margin: 0 auto; padding: 20px 15px; }
-
-        /* User Info Box */
         .user-profile { background: #151a25; border: 1px solid #2a2f3a; border-radius: 15px; padding: 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
         .avatar { width: 60px; height: 60px; background: linear-gradient(135deg, #f3ba2f, #f48c06); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: #000;}
         .user-details h2 { color: #fff; font-size: 18px; margin-bottom: 5px;}
         .user-details p { color: #a0a5b1; font-size: 13px; font-weight: bold; margin-bottom: 3px;}
         .user-id { background: rgba(243,186,47,0.1); color: #f3ba2f; padding: 3px 8px; border-radius: 5px; font-size: 11px; display: inline-block;}
-
-        /* Wallet Box */
         .wallet-card { background: linear-gradient(135deg, #151a25, #1a1608); border: 1px solid #f3ba2f; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 25px;}
         .bal-amt { color: #00ff88; font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.3); margin-bottom: 15px;}
         .wallet-actions { display: flex; gap: 10px; }
         .action-btn-sm { flex: 1; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; border: none; text-transform: uppercase;}
         .btn-dep { background: #f3ba2f; color: #000; }
         .btn-wit { background: transparent; color: #fff; border: 1px solid #a0a5b1; }
-
-        /* Menu List */
         .menu-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;}
         .menu-item { background: #151a25; border: 1px solid #2a2f3a; border-radius: 10px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s;}
         .menu-item:active { background: #2a2f3a; }
         .menu-left { display: flex; align-items: center; gap: 15px; font-size: 15px; color: #fff; font-weight: bold;}
         .menu-icon { font-size: 18px;}
         .arrow { color: #a0a5b1; font-size: 14px;}
-
         .btn-logout { width: 100%; background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; text-transform: uppercase; transition: 0.3s;}
         .btn-logout:active { background: #ff4d4d; color: #fff;}
-
-        /* BOTTOM NAVIGATION BAR */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #151a25; border-top: 1px solid #2a2f3a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000;}
         .nav-item { text-align: center; color: #a0a5b1; font-size: 11px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase;}
         .nav-item.active { color: #f3ba2f; }
         .nav-icon { font-size: 22px; margin-bottom: 3px; display: block;}
-
-        /* 🔥 NEW: FULL PAGE POPUP CSS 🔥 */
         .full-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0e14; z-index: 2000; display: none; flex-direction: column; overflow-y: auto; animation: slideUp 0.3s ease-out; }
         .popup-header-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #151a25; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0;}
         .popup-title-bar { font-size: 18px; color: #f3ba2f; font-weight: bold; text-transform: uppercase;}
         .close-btn { color: #ff4d4d; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1;}
         .popup-body { padding: 20px; color: #a0a5b1; font-size: 14px; line-height: 1.6;}
-        
         .contact-box { background: #151a25; border: 1px solid #2a2f3a; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;}
         .contact-box a { color: #00ff88; text-decoration: none; font-weight: bold; font-size: 16px;}
         .input-group { margin-bottom: 15px; text-align: left; }
@@ -62,7 +48,6 @@
         .btn-main { width: 100%; background: #2196F3; color: #fff; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 10px;}
         .btn-main:active { transform: scale(0.98); }
         .btn-main:disabled { background: #2a2f3a; color: #a0a5b1;}
-
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 
@@ -72,6 +57,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyC1X3E6WPLXn1HTWvcP25yUBmKlvraiHHs",
             authDomain: "smart-earn-459ec.firebaseapp.com",
+            databaseURL: "https://smart-earn-459ec-default-rtdb.firebaseio.com",
             projectId: "smart-earn-459ec",
             storageBucket: "smart-earn-459ec.firebasestorage.app",
             messagingSenderId: "314834673807",
@@ -82,13 +68,8 @@
     </script>
 </head>
 <body>
-
-    <header>
-        <div class="logo">👤 Profile</div>
-    </header>
-
+    <header><div class="logo">👤 Profile</div></header>
     <div class="container">
-        
         <div class="user-profile">
             <div class="avatar" id="avatar-letter">S</div>
             <div class="user-details">
@@ -97,7 +78,6 @@
                 <div class="user-id" id="u-id">ID: Loading...</div>
             </div>
         </div>
-
         <div class="wallet-card">
             <div style="color: #a0a5b1; font-size: 12px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase;">Total Balance</div>
             <div class="bal-amt" id="u-bal">₹0.00</div>
@@ -106,7 +86,6 @@
                 <button class="action-btn-sm btn-wit" onclick="window.location.href='withdraw.html'">Withdraw</button>
             </div>
         </div>
-
         <div class="menu-list">
             <div class="menu-item" onclick="window.location.href='history.html'">
                 <div class="menu-left"><span class="menu-icon">📜</span> Game History</div>
@@ -116,226 +95,26 @@
                 <div class="menu-left"><span class="menu-icon">👥</span> Referral Team</div>
                 <div class="arrow">➔</div>
             </div>
-            
             <div class="menu-item" style="border-color:#2196F3;" onclick="openPopup('helpPopup')">
                 <div class="menu-left"><span class="menu-icon">🎧</span> <span style="color:#2196F3;">Help & Support</span></div>
                 <div class="arrow">➔</div>
             </div>
-
             <div class="menu-item" onclick="openPopup('privacyPopup')">
                 <div class="menu-left"><span class="menu-icon">🔒</span> Privacy Policy</div>
                 <div class="arrow">➔</div>
             </div>
-
             <div class="menu-item" onclick="openPopup('tcPopup')">
                 <div class="menu-left"><span class="menu-icon">📝</span> Terms & Conditions</div>
                 <div class="arrow">➔</div>
             </div>
         </div>
-
         <button class="btn-logout" onclick="logout()">🚪 Log Out</button>
-
     </div>
-
     <div class="bottom-nav">
-        <div class="nav-item" onclick="window.location.href='game.html'">
-            <span class="nav-icon">🎮</span>Game
-        </div>
-        <div class="nav-item" onclick="window.location.href='referral.html'">
-            <span class="nav-icon">👥</span>Referral
-        </div>
-        <div class="nav-item" onclick="window.location.href='history.html'">
-            <span class="nav-icon">📜</span>History
-        </div>
-        <div class="nav-item active" onclick="window.location.href='profile.html'">
-            <span class="nav-icon">👤</span>Menu
-        </div>
+        <div class="nav-item" onclick="window.location.href='game.html'"><span class="nav-icon">🎮</span>Game</div>
+        <div class="nav-item" onclick="window.location.href='referral.html'"><span class="nav-icon">👥</span>Referral</div>
+        <div class="nav-item" onclick="window.location.href='history.html'"><span class="nav-icon">📜</span>History</div>
+        <div class="nav-item active" onclick="window.location.href='profile.html'"><span class="nav-icon">👤</span>Menu</div>
     </div>
-
-    <div class="full-popup" id="helpPopup">
-        <div class="popup-header-bar">
-            <div class="popup-title-bar">🎧 Help & Support</div>
-            <div class="close-btn" onclick="closePopup('helpPopup')">✖</div>
-        </div>
-        <div class="popup-body">
-            <div class="contact-box">
-                <p style="margin-bottom:10px;">Official Telegram Support:</p>
-                <a href="https://t.me/SmartEarnOfficial" target="_blank">✈️ @SmartEarnOfficial</a>
-                <p style="margin-top:15px; font-size:12px; color:#a0a5b1;">Email: support@smartearn.com</p>
-            </div>
-            
-            <h3 style="color:#fff; margin-bottom:15px; border-bottom:1px dashed #2a2f3a; padding-bottom:10px;">Submit a Query</h3>
-            
-            <div class="input-group">
-                <label>Select Subject</label>
-                <select class="custom-input" id="q-sub" onchange="checkOtherSubject()">
-                    <option value="Deposit Not Added in Wallet">Deposit Not Added in Wallet</option>
-                    <option value="Withdrawal Pending/Rejected">Withdrawal Pending / Rejected</option>
-                    <option value="Game Result Error / Freeze">Game Result Error / Freeze</option>
-                    <option value="Referral Commission Issue">Referral Commission Issue</option>
-                    <option value="Other">Other (Type Below)</option>
-                </select>
-                <input type="text" id="q-other" class="custom-input" placeholder="Type your subject..." style="display:none; margin-top:10px;">
-            </div>
-
-            <div class="input-group">
-                <label>Describe your problem</label>
-                <textarea id="q-desc" class="custom-input" rows="4" placeholder="Please explain your issue in detail..."></textarea>
-            </div>
-
-            <div class="input-group">
-                <label>Upload Screenshot (Optional)</label>
-                <input type="file" id="q-img" class="file-input" accept="image/*">
-            </div>
-
-            <button class="btn-main" id="submit-q-btn" onclick="submitQuery()">🚀 Submit Query</button>
-            <p style="text-align:center; font-size:11px; margin-top:15px;">Our team will review your query and reply within 24 hours.</p>
-        </div>
-    </div>
-
-    <div class="full-popup" id="tcPopup">
-        <div class="popup-header-bar">
-            <div class="popup-title-bar">📝 Terms & Conditions</div>
-            <div class="close-btn" onclick="closePopup('tcPopup')">✖</div>
-        </div>
-        <div class="popup-body">
-            <h3 style="color:#fff; margin-bottom:10px;">1. Introduction</h3>
-            <p style="margin-bottom:15px;">Welcome to Smart Earn. By using our application, you agree to be bound by these terms and conditions. You must be at least 18 years old to use this platform.</p>
-            
-            <h3 style="color:#fff; margin-bottom:10px;">2. Financial Risk</h3>
-            <p style="margin-bottom:15px;">This game involves financial risk and may be addictive. Please play responsibly and at your own risk. The company is not responsible for any financial losses incurred.</p>
-            
-            <h3 style="color:#fff; margin-bottom:10px;">3. Deposits & Withdrawals</h3>
-            <p style="margin-bottom:15px;">All deposits are final. Game Bonus cannot be directly withdrawn. Withdrawals will be processed within 2 to 24 hours. Admin reserves the right to reject withdrawals if fraudulent activity is suspected.</p>
-            
-            <h3 style="color:#fff; margin-bottom:10px;">4. Account Block</h3>
-            <p style="margin-bottom:15px;">Creating multiple fake accounts, using UTR tricks, or abusing the referral system will result in a permanent ban and forfeiture of all funds.</p>
-        </div>
-    </div>
-
-    <div class="full-popup" id="privacyPopup">
-        <div class="popup-header-bar">
-            <div class="popup-title-bar">🔒 Privacy Policy</div>
-            <div class="close-btn" onclick="closePopup('privacyPopup')">✖</div>
-        </div>
-        <div class="popup-body">
-            <h3 style="color:#fff; margin-bottom:10px;">Data Collection</h3>
-            <p style="margin-bottom:15px;">We collect your mobile number, name, and payment details strictly for the purpose of account creation and processing transactions.</p>
-            
-            <h3 style="color:#fff; margin-bottom:10px;">Data Security</h3>
-            <p style="margin-bottom:15px;">Your data is securely stored using industry-standard encryption. We do not sell or share your personal information with third-party marketing agencies.</p>
-            
-            <h3 style="color:#fff; margin-bottom:10px;">Cookies</h3>
-            <p style="margin-bottom:15px;">We use local storage and cookies to keep you logged in and enhance your gaming experience.</p>
-        </div>
-    </div>
-
-    <script>
-        let userData = {};
-
-        window.onload = function() {
-            let saved = localStorage.getItem('smartEarnUser');
-            if(!saved) { window.location.href = "index.html"; return; }
-            let localUserData = JSON.parse(saved);
-            userData = localUserData;
-
-            function updateUI(data) {
-                document.getElementById('u-name').innerText = data.name || "Smart Player";
-                document.getElementById('u-phone').innerText = "+91 " + (data.phone || "XXX");
-                document.getElementById('u-id').innerText = "ID: " + data.myRefCode;
-                document.getElementById('u-bal').innerText = "₹" + (data.inrBalance || 0).toFixed(2);
-                
-                if(data.name) {
-                    document.getElementById('avatar-letter').innerText = data.name.charAt(0).toUpperCase();
-                }
-            }
-
-            updateUI(localUserData);
-
-            if(localUserData.phone) {
-                db.ref('users/' + localUserData.phone).on('value', (snapshot) => {
-                    if(snapshot.exists()) {
-                        let freshData = snapshot.val();
-                        userData = freshData;
-                        localStorage.setItem('smartEarnUser', JSON.stringify(freshData));
-                        updateUI(freshData); 
-                    }
-                });
-            }
-        };
-
-        function logout() {
-            let confirmLogout = confirm("Are you sure you want to log out?");
-            if(confirmLogout) {
-                localStorage.removeItem('smartEarnUser');
-                window.location.href = 'index.html';
-            }
-        }
-
-        // === POPUP LOGIC ===
-        function openPopup(id) { document.getElementById(id).style.display = "flex"; }
-        function closePopup(id) { document.getElementById(id).style.display = "none"; }
-
-        function checkOtherSubject() {
-            let val = document.getElementById('q-sub').value;
-            document.getElementById('q-other').style.display = val === 'Other' ? 'block' : 'none';
-        }
-
-        // === QUERY SUBMIT LOGIC ===
-        function submitQuery() {
-            let sub = document.getElementById('q-sub').value;
-            if(sub === 'Other') sub = document.getElementById('q-other').value;
-            let desc = document.getElementById('q-desc').value;
-            let fileInput = document.getElementById('q-img');
-            
-            if(!sub || !desc) return alert("❌ Please fill both Subject and Description!");
-            
-            let btn = document.getElementById('submit-q-btn');
-            btn.innerText = "⏳ Submitting...";
-            btn.disabled = true;
-
-            let queryData = {
-                phone: userData.phone,
-                userId: userData.myRefCode,
-                name: userData.name,
-                subject: sub,
-                description: desc,
-                date: new Date().toLocaleString(),
-                status: "Pending"
-            };
-
-            // Image Upload Logic (Converting to Base64)
-            if(fileInput.files.length > 0) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    queryData.image = e.target.result; 
-                    saveToFirebase(queryData, btn);
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                queryData.image = "";
-                saveToFirebase(queryData, btn);
-            }
-        }
-        
-        function saveToFirebase(data, btn) {
-            let qId = "Q" + Date.now();
-            db.ref('support_queries/' + qId).set(data).then(() => {
-                alert("✅ Query Submitted Successfully!\n\nOur team will review and reply within 24 hours.");
-                closePopup('helpPopup');
-                
-                // Reset Form
-                btn.innerText = "🚀 Submit Query";
-                btn.disabled = false;
-                document.getElementById('q-desc').value = "";
-                document.getElementById('q-other').value = "";
-                document.getElementById('q-img').value = "";
-            }).catch(err => {
-                alert("❌ Error Submitting Query. Please try again or use a smaller image.");
-                btn.innerText = "🚀 Submit Query";
-                btn.disabled = false;
-            });
-        }
-    </script>
-</body>
+    </body>
 </html>
