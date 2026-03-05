@@ -26,14 +26,17 @@
 
         .earning-box { background: linear-gradient(135deg, #151a25, #1a1608); border: 1px solid #f3ba2f; border-radius: 15px; padding: 20px; text-align: center; margin-bottom: 25px;}
         .earning-title { color: #a0a5b1; font-size: 14px; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;}
-        .earning-amt { font-size: 35px; color: #f3ba2f; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 10px rgba(243,186,47,0.3);}
+        .earning-amt { font-size: 35px; color: #f3ba2f; font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 10px rgba(243,186,47,0.3);}
+        .withdrawn-text { font-size: 12px; color: #a0a5b1; margin-bottom: 20px; font-weight: bold;}
         
-        .breakdown-grid { display: flex; justify-content: space-between; margin-bottom: 20px; background: #0b0e14; padding: 12px; border-radius: 10px; border: 1px solid #2a2f3a;}
-        .bd-item { flex: 1; text-align: center;}
-        .bd-item:first-child { border-right: 1px dashed #2a2f3a;}
-        .bd-label { font-size: 11px; color: #a0a5b1; text-transform: uppercase; margin-bottom: 5px; font-weight: bold;}
-        .bd-val-comm { font-size: 16px; color: #00ff88; font-weight: bold;}
-        .bd-val-bonus { font-size: 16px; color: #f3ba2f; font-weight: bold;}
+        /* 🔥 NEW: 4 BOX GRID CSS 🔥 */
+        .four-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;}
+        .grid-box { background: #0b0e14; border: 1px solid #2a2f3a; border-radius: 10px; padding: 12px; text-align: center;}
+        .grid-label { font-size: 10px; color: #a0a5b1; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;}
+        .grid-val { font-size: 16px; color: #00ff88; font-weight: bold;}
+        .grid-val.blue { color: #2196F3; }
+        .grid-val.yellow { color: #f3ba2f; }
+        .grid-val.white { color: #fff; }
 
         .transfer-btn { width: 100%; background: #2196F3; color: #fff; border: none; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);}
         .transfer-btn:active { transform: scale(0.98); }
@@ -42,10 +45,12 @@
         .comm-list h3 { color: #fff; font-size: 14px; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px; display: flex; justify-content: space-between;}
         .comm-row { display: flex; justify-content: space-between; padding: 10px; background: #0b0e14; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #00ff88; align-items: center;}
         .comm-row.bonus { border-left: 3px solid #f3ba2f; background: rgba(243,186,47,0.05);}
+        .comm-row.team { border-left: 3px solid #2196F3; background: rgba(33, 150, 243, 0.05);}
         .comm-user { color: #a0a5b1; font-size: 13px; font-weight: bold;}
         .comm-desc { font-size: 11px; color: #fff;}
         .comm-amt { color: #00ff88; font-weight: bold; font-size: 14px; text-align: right;}
         .comm-amt.bonus-color { color: #f3ba2f; }
+        .comm-amt.team-color { color: #2196F3; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #151a25; border-top: 1px solid #2a2f3a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000;}
         .nav-item { text-align: center; color: #a0a5b1; font-size: 11px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase;}
@@ -78,9 +83,9 @@
         
         <div class="link-box">
             <div class="link-title">Your Referral Link</div>
-            <div class="ref-link" id="my-ref-link">https://smartearn.com/?ref=...</div>
+            <div class="ref-link" id="my-ref-link">Loading...</div>
             <button class="copy-btn" onclick="copyLink()">Copy & Share</button>
-            <p style="font-size: 11px; color: #a0a5b1; margin-top: 10px;">Earn 1% on Directs' Wins & Referral Bonus on their 1st Deposit!</p>
+            <p style="font-size: 11px; color: #a0a5b1; margin-top: 10px;">Earn 1% on Directs & 0.1% on Team Play!</p>
         </div>
 
         <div class="stats-grid">
@@ -92,22 +97,31 @@
             <div class="stat-card">
                 <h4 style="color: #00ff88;">Directs (L1)</h4>
                 <h2 id="total-direct">0</h2>
-                <span>Active Earning</span>
+                <span>Active</span>
             </div>
         </div>
 
         <div class="earning-box">
-            <div class="earning-title">Total Referral Income</div>
-            <div class="earning-amt" id="ref-total-balance">₹0.00</div>
+            <div class="earning-title">Available To Withdraw</div>
+            <div class="earning-amt" id="ref-avail-balance">₹0.00</div>
+            <div class="withdrawn-text">Total Withdrawn: <span id="val-withdrawn" style="color:#ff4d4d;">₹0.00</span></div>
             
-            <div class="breakdown-grid">
-                <div class="bd-item">
-                    <div class="bd-label">1% Win Commission</div>
-                    <div class="bd-val-comm" id="val-comm">₹0.00</div>
+            <div class="four-grid">
+                <div class="grid-box">
+                    <div class="grid-label">Direct Play (1%)</div>
+                    <div class="grid-val" id="box-dir-comm">₹0.00</div>
                 </div>
-                <div class="bd-item">
-                    <div class="bd-label">Referral Bonus (1st Deposit)</div>
-                    <div class="bd-val-bonus" id="val-bonus">₹0.00</div>
+                <div class="grid-box">
+                    <div class="grid-label">Team Play (0.1%)</div>
+                    <div class="grid-val blue" id="box-team-comm">₹0.00</div>
+                </div>
+                <div class="grid-box">
+                    <div class="grid-label">1st Dep Bonus</div>
+                    <div class="grid-val yellow" id="box-dep-bonus">₹0.00</div>
+                </div>
+                <div class="grid-box">
+                    <div class="grid-label">Total Earned</div>
+                    <div class="grid-val white" id="box-total-earn">₹0.00</div>
                 </div>
             </div>
 
@@ -115,62 +129,169 @@
         </div>
 
         <div class="comm-list">
-            <h3>📈 Directs Activity (Level 1) <span style="color: #00ff88; font-size: 10px; animation: blink 1s infinite;">● LIVE</span></h3>
+            <h3>📈 Live Team Activity <span style="color: #00ff88; font-size: 10px; animation: blink 1s infinite;">● REAL</span></h3>
             <div id="comm-history">
-                </div>
+                <p style="text-align:center; color:#a0a5b1; font-size:12px;">Waiting for team activity...</p>
+            </div>
         </div>
 
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item" onclick="window.location.href='game.html'">
-            <span class="nav-icon">🎮</span>Game
-        </div>
-        <div class="nav-item active" onclick="window.location.href='referral.html'">
-            <span class="nav-icon">👥</span>Referral
-        </div>
-        <div class="nav-item" onclick="window.location.href='history.html'">
-            <span class="nav-icon">📜</span>History
-        </div>
-        <div class="nav-item" onclick="window.location.href='profile.html'">
-            <span class="nav-icon">👤</span>Menu
-        </div>
+        <div class="nav-item" onclick="window.location.href='game.html'"><span class="nav-icon">🎮</span>Game</div>
+        <div class="nav-item active" onclick="window.location.href='referral.html'"><span class="nav-icon">👥</span>Referral</div>
+        <div class="nav-item" onclick="window.location.href='history.html'"><span class="nav-icon">📜</span>History</div>
+        <div class="nav-item" onclick="window.location.href='profile.html'"><span class="nav-icon">👤</span>Menu</div>
     </div>
 
     <script>
         let userData = {};
+        let myDirectCount = 0;
+        let myTeamCount = 0;
+        let globalWithdrawable = 0; 
 
         window.onload = function() {
             let saved = localStorage.getItem('smartEarnUser');
             if(!saved) { window.location.href = "index.html"; return; }
             userData = JSON.parse(saved);
 
-            if(!userData.refCommEarned) userData.refCommEarned = 0.00; 
-            if(!userData.refBonusEarned) userData.refBonusEarned = 0.00; 
-
-            if(!userData.fakeTeam) userData.fakeTeam = Math.floor(Math.random() * 50) + 12; 
-            if(!userData.fakeDirect) userData.fakeDirect = Math.floor(userData.fakeTeam / 3);
-
             document.getElementById('my-ref-link').innerText = window.location.origin + "/index.html?ref=" + userData.myRefCode;
-            document.getElementById('total-team').innerText = userData.fakeTeam;
-            document.getElementById('total-direct').innerText = userData.fakeDirect;
-            
-            updateRefUI();
-            startLiveDirectActivity(); 
-        };
-
-        // 🔥 FIREBASE UPDATE ADDED HERE 🔥
-        function updateRefUI() {
-            let totalRef = userData.refCommEarned + userData.refBonusEarned;
-            document.getElementById('ref-total-balance').innerText = "₹" + totalRef.toFixed(2);
-            document.getElementById('val-comm').innerText = "₹" + userData.refCommEarned.toFixed(2);
-            document.getElementById('val-bonus').innerText = "₹" + userData.refBonusEarned.toFixed(2);
-            
-            localStorage.setItem('smartEarnUser', JSON.stringify(userData));
 
             if(userData.phone) {
-                db.ref('users/' + userData.phone).set(userData).catch(err => console.log(err));
+                db.ref('users/' + userData.phone).on('value', snap => {
+                    if(snap.exists()) {
+                        let freshData = snap.val();
+                        userData.referralWithdrawn = freshData.referralWithdrawn || 0;
+                        calculateAndRenderTeam();
+                    }
+                });
             }
+        };
+
+        function calculateAndRenderTeam() {
+            db.ref('users').once('value').then(snap => {
+                let allUsers = snap.val() || {};
+                let directUsers = [];
+                let historyEvents = [];
+                
+                // Trackers for 4 boxes
+                let calcDirectComm = 0;
+                let calcTeamComm = 0;
+                let calcDepositBonus = 0;
+                
+                // 1. Find L1 (Directs)
+                for(let phone in allUsers) {
+                    if(allUsers[phone].sponsoredBy === userData.myRefCode) {
+                        let member = allUsers[phone];
+                        directUsers.push(member);
+
+                        // Calculate Deposit Bonus
+                        if(member.depositHistory && member.depositHistory.length > 0) {
+                            let firstDepAmt = parseFloat(member.depositHistory[0].amount);
+                            let bonusAmt = 0;
+                            if (firstDepAmt >= 10000) bonusAmt = 1500;
+                            else if (firstDepAmt >= 5000) bonusAmt = 600;
+                            else if (firstDepAmt >= 1000) bonusAmt = 100;
+                            else if (firstDepAmt >= 500) bonusAmt = 50;
+                            else if (firstDepAmt >= 299) bonusAmt = 30;
+
+                            calcDepositBonus += bonusAmt;
+
+                            historyEvents.push({
+                                dateStr: member.depositHistory[0].date,
+                                name: member.name || member.myRefCode,
+                                type: "Direct 1st Deposit",
+                                actionText: `1st Deposit ₹${firstDepAmt} (Bonus)`,
+                                earned: bonusAmt,
+                                timestamp: new Date(member.depositHistory[0].date).getTime(),
+                                boxType: "bonus"
+                            });
+                        }
+                    }
+                }
+                myDirectCount = directUsers.length;
+                
+                // 2. Find L2+ (All Team)
+                let teamUsers = [...directUsers];
+                let queue = [...directUsers];
+                while(queue.length > 0) {
+                    let current = queue.shift();
+                    if(current.myRefCode) {
+                        for(let phone in allUsers) {
+                            if(allUsers[phone].sponsoredBy === current.myRefCode && !teamUsers.includes(allUsers[phone])) {
+                                teamUsers.push(allUsers[phone]);
+                                queue.push(allUsers[phone]);
+                            }
+                        }
+                    }
+                }
+                myTeamCount = teamUsers.length;
+
+                // 3. Process Game Commission (Direct vs Team)
+                teamUsers.forEach(member => {
+                    if(member.gameHistory) {
+                        member.gameHistory.forEach(game => {
+                            let isDirect = member.sponsoredBy === userData.myRefCode;
+                            let commRate = isDirect ? 0.01 : 0.001;
+                            let earnedAmt = game.amount * commRate;
+
+                            if(isDirect) calcDirectComm += earnedAmt;
+                            else calcTeamComm += earnedAmt;
+
+                            historyEvents.push({
+                                dateStr: game.date,
+                                name: member.name || member.myRefCode,
+                                type: isDirect ? "Direct (L1)" : "Team (L2+)",
+                                actionText: `Played ₹${game.amount} Game`,
+                                earned: earnedAmt,
+                                timestamp: new Date(game.date).getTime(),
+                                boxType: isDirect ? "direct" : "team"
+                            });
+                        });
+                    }
+                });
+
+                // 🔥 4. Update UI 4 Boxes 🔥
+                document.getElementById('total-direct').innerText = myDirectCount;
+                document.getElementById('total-team').innerText = myTeamCount;
+
+                let totalLifetimeEarned = calcDirectComm + calcTeamComm + calcDepositBonus;
+                let withdrawn = userData.referralWithdrawn || 0;
+                
+                globalWithdrawable = totalLifetimeEarned - withdrawn;
+                if(globalWithdrawable < 0) globalWithdrawable = 0;
+
+                // Update Big Text
+                document.getElementById('ref-avail-balance').innerText = "₹" + globalWithdrawable.toFixed(2);
+                document.getElementById('val-withdrawn').innerText = "₹" + withdrawn.toFixed(2);
+                
+                // Update 4 Grid Boxes
+                document.getElementById('box-dir-comm').innerText = "₹" + calcDirectComm.toFixed(2);
+                document.getElementById('box-team-comm').innerText = "₹" + calcTeamComm.toFixed(2);
+                document.getElementById('box-dep-bonus').innerText = "₹" + calcDepositBonus.toFixed(2);
+                document.getElementById('box-total-earn').innerText = "₹" + totalLifetimeEarned.toFixed(2);
+
+                // 5. Render History List (Top 15)
+                historyEvents.sort((a, b) => b.timestamp - a.timestamp);
+                let list = document.getElementById('comm-history');
+                
+                if(historyEvents.length > 0) {
+                    list.innerHTML = ""; 
+                    historyEvents.slice(0, 15).forEach(ev => {
+                        let badgeClass = ev.boxType === "bonus" ? "bonus" : (ev.boxType === "team" ? "team" : ""); 
+                        let textClass = ev.boxType === "bonus" ? "bonus-color" : (ev.boxType === "team" ? "team-color" : "");
+                        
+                        list.innerHTML += `
+                        <div class="comm-row ${badgeClass}">
+                            <div>
+                                <div class="comm-user">${ev.name} <span style="font-size:9px; color:#f3ba2f;">[${ev.type}]</span></div>
+                                <div class="comm-desc">${ev.actionText} • ${ev.dateStr}</div>
+                            </div>
+                            <div class="comm-amt ${textClass}">+₹${ev.earned.toFixed(2)}</div>
+                        </div>`;
+                    });
+                }
+            });
         }
 
         function copyLink() {
@@ -179,65 +300,30 @@
         }
 
         function transferToMainWallet() {
-            let totalRef = userData.refCommEarned + userData.refBonusEarned;
+            if(globalWithdrawable < 50) return alert("❌ Minimum transfer amount is ₹50.");
             
-            if(totalRef < 50) return alert("❌ Minimum transfer amount is ₹50.");
-            
-            userData.inrBalance += totalRef; 
-            
-            userData.refCommEarned = 0; 
-            userData.refBonusEarned = 0; 
-            
-            updateRefUI(); // This will auto-save the new balance to Firebase
-            alert(`✅ SUCCESS!\n\n₹${totalRef.toFixed(2)} transferred to your Main Wallet for direct withdrawal!`);
-        }
+            let btn = document.querySelector('.transfer-btn');
+            btn.innerText = "⏳ Transferring...";
+            btn.disabled = true;
 
-        function startLiveDirectActivity() {
-            setInterval(() => {
-                let isFirstDeposit = Math.random() > 0.85; 
-                let directMember = "Direct_" + Math.floor(1000 + Math.random() * 9000);
+            let newMainBal = (userData.inrBalance || 0) + globalWithdrawable;
+            let newWithdrawnTracker = (userData.referralWithdrawn || 0) + globalWithdrawable;
+
+            // Sync to Firebase
+            db.ref('users/' + userData.phone).update({
+                inrBalance: newMainBal,
+                referralWithdrawn: newWithdrawnTracker
+            }).then(() => {
+                userData.inrBalance = newMainBal;
+                userData.referralWithdrawn = newWithdrawnTracker;
+                localStorage.setItem('smartEarnUser', JSON.stringify(userData));
                 
-                let list = document.getElementById('comm-history');
-                let html = "";
-
-                if(isFirstDeposit) {
-                    let depositAmounts = [299, 500, 1000, 5000];
-                    let depositBonuses = {299: 30, 500: 50, 1000: 100, 5000: 600};
-                    let amt = depositAmounts[Math.floor(Math.random() * depositAmounts.length)];
-                    let referralBonus = depositBonuses[amt];
-
-                    userData.refBonusEarned += referralBonus;
-                    
-                    html = `
-                    <div class="comm-row bonus">
-                        <div>
-                            <div class="comm-user">${directMember}</div>
-                            <div class="comm-desc">1st Deposit ₹${amt} (Referral Bonus)</div>
-                        </div>
-                        <div class="comm-amt bonus-color">+₹${referralBonus.toFixed(2)}</div>
-                    </div>`;
-                } else {
-                    let winAmount = Math.floor(Math.random() * 1000) + 100; 
-                    let commission = winAmount * 0.01; 
-                    
-                    userData.refCommEarned += commission;
-
-                    html = `
-                    <div class="comm-row">
-                        <div>
-                            <div class="comm-user">${directMember}</div>
-                            <div class="comm-desc">Won ₹${winAmount} (1% Comm)</div>
-                        </div>
-                        <div class="comm-amt">+₹${commission.toFixed(2)}</div>
-                    </div>`;
-                }
+                alert(`✅ SUCCESS!\n\n₹${globalWithdrawable.toFixed(2)} transferred to your Main Wallet!`);
+                btn.innerText = "Withdraw to Main Wallet";
+                btn.disabled = false;
                 
-                updateRefUI();
-
-                list.insertAdjacentHTML('afterbegin', html);
-                if(list.children.length > 5) list.removeChild(list.lastChild);
-
-            }, 3000); 
+                calculateAndRenderTeam(); // Refresh UI dynamically
+            });
         }
     </script>
 </body>
