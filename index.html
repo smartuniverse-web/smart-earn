@@ -7,8 +7,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0e14; color: #e2e8f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px 0; }
@@ -30,6 +28,7 @@
 
         .btn-main { width: 100%; background: #f3ba2f; color: #000; border: none; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase; }
         .btn-main:active { transform: scale(0.98); }
+        .btn-main:disabled { background: #555; color: #a0a5b1; cursor: not-allowed; }
         
         .text-link { color: #f3ba2f; font-size: 13px; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block;}
         .text-link:hover { color: #fff; }
@@ -38,10 +37,7 @@
         .forgot-link:hover { color: #f3ba2f; text-decoration: underline; }
 
         /* Sections (Hidden by default except login) */
-        #register-section, #otp-section, #forgot-mobile-sec, #forgot-otp-sec, #forgot-newpass-sec { display: none; }
-
-        /* 🔥 reCAPTCHA Area 🔥 */
-        #recaptcha-container { margin: 10px 0; display: flex; justify-content: center; }
+        #register-section, #forgot-mobile-sec, #forgot-otp-sec, #forgot-newpass-sec { display: none; }
     </style>
 
     <script>
@@ -55,7 +51,6 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const auth = firebase.auth(); // Auth initialize
     </script>
 </head>
 <body>
@@ -108,18 +103,8 @@
                 <input type="text" id="reg-ref" class="custom-input" placeholder="Enter Sponsor ID" style="color: #00ff88; font-weight: bold; text-transform: uppercase;">
             </div>
 
-            <div id="recaptcha-container"></div>
-
-            <button class="btn-main" id="send-btn" onclick="sendRegOTP()">Send OTP</button>
+            <button class="btn-main" id="register-btn" onclick="registerUser()">Register Now</button>
             <div class="text-link" onclick="showSection('login-section')">Already have an account? Login</div>
-        </div>
-
-        <div id="otp-section">
-            <h3 style="color: #fff; margin-bottom: 10px; font-size: 16px;">Verify Mobile Number</h3>
-            <div class="input-group">
-                <input type="number" id="reg-otp-input" class="custom-input" placeholder="XXXXXX" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
-            </div>
-            <button class="btn-main" id="verify-btn" onclick="verifyRegOTP()">Verify & Register</button>
         </div>
 
 
@@ -158,7 +143,6 @@
     </div>
 
     <script>
-        let confirmationResult = null;
         let tempForgotPhone = ""; 
 
         window.onload = function() {
@@ -170,70 +154,84 @@
                 document.getElementById('reg-ref').readOnly = true; 
             }
             
-            // Captcha initialization
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                'size': 'normal'
-            });
-            recaptchaVerifier.render();
+            // अगर यूज़र पहले से लॉग इन है, तो सीधा गेम में भेजें
+            let saved = localStorage.getItem('smartEarnUser');
+            if(saved) {
+                window.location.href = "game.html";
+            }
         };
 
         function showSection(sectionId) {
-            let sections = ['login-section', 'register-section', 'otp-section', 'forgot-mobile-sec', 'forgot-otp-sec', 'forgot-newpass-sec'];
+            let sections = ['login-section', 'register-section', 'forgot-mobile-sec', 'forgot-otp-sec', 'forgot-newpass-sec'];
             sections.forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById(sectionId).style.display = 'block';
         }
 
+        // =========================
+        // 1. LOGIN LOGIC
+        // =========================
         function loginUser() {
             let loginId = document.getElementById('log-id').value.trim();
             let loginPass = document.getElementById('log-pass').value;
             if(!loginId || !loginPass) return alert("Please enter both ID/Mobile and Password!");
 
+            let btn = document.querySelector("#login-section .btn-main");
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
+
             db.ref('users').once('value').then((snapshot) => {
                 let usersObj = snapshot.val() || {};
                 let user = Object.values(usersObj).find(u => (u.phone === loginId || u.myRefCode === loginId) && u.password === loginPass);
+                
                 if(user) {
                     localStorage.setItem('smartEarnUser', JSON.stringify(user));
                     window.location.href = "game.html";
-                } else { alert("❌ Invalid Mobile/ID or Password!"); }
+                } else { 
+                    alert("❌ Invalid Mobile/ID or Password!"); 
+                    btn.innerText = "Login Now";
+                    btn.disabled = false;
+                }
+            }).catch(err => {
+                alert("Network Error!");
+                btn.innerText = "Login Now";
+                btn.disabled = false;
             });
         }
 
-        function sendRegOTP() {
+        // =========================
+        // 2. DIRECT REGISTER LOGIC (NO OTP)
+        // =========================
+        function registerUser() {
             let name = document.getElementById("reg-name").value.trim();
             let mobile = document.getElementById("reg-mobile").value.trim();
             let pass = document.getElementById("reg-pass").value;
+            let refCode = document.getElementById("reg-ref").value.toUpperCase() || "NONE";
 
-            if(name === "" || mobile.length < 10 || pass.length < 4) return alert("Please fill all details correctly.");
+            if(name === "" || mobile.length !== 10 || pass.length < 4) {
+                return alert("Please fill all details correctly. Mobile must be 10 digits.");
+            }
 
+            let btn = document.getElementById("register-btn");
+            btn.innerText = "Creating Account...";
+            btn.disabled = true;
+
+            // Check if mobile already exists
             db.ref('users/' + mobile).once('value').then((snapshot) => {
-                if(snapshot.exists()) return alert("❌ Number already registered.");
+                if(snapshot.exists()) {
+                    alert("❌ Number already registered. Please Login.");
+                    btn.innerText = "Register Now";
+                    btn.disabled = false;
+                    return;
+                }
 
-                document.getElementById("send-btn").innerText = "Sending SMS...";
-                
-                auth.signInWithPhoneNumber("+91" + mobile, window.recaptchaVerifier)
-                    .then((result) => {
-                        confirmationResult = result;
-                        alert("✅ OTP Sent to " + mobile);
-                        showSection('otp-section');
-                    }).catch((err) => { alert("Error: " + err.message); location.reload(); });
-            });
-        }
-
-        function verifyRegOTP() {
-            let code = document.getElementById("reg-otp-input").value;
-            if(code.length !== 6) return alert("Enter 6-digit code!");
-
-            document.getElementById("verify-btn").innerText = "Processing...";
-
-            confirmationResult.confirm(code).then(() => {
-                let mobile = document.getElementById("reg-mobile").value;
+                // Generate Unique ID
                 let myUniqueId = "SE-" + Math.floor(1000 + Math.random() * 9000);
                 
                 let newUser = { 
-                    name: document.getElementById("reg-name").value,
+                    name: name,
                     phone: mobile,
-                    password: document.getElementById("reg-pass").value,
-                    sponsoredBy: document.getElementById("reg-ref").value.toUpperCase() || "NONE",
+                    password: pass,
+                    sponsoredBy: refCode,
                     myRefCode: myUniqueId,
                     inrBalance: 50.00,       
                     hasDeposited: false,     
@@ -243,30 +241,55 @@
                     fakeTeam: Math.floor(Math.random() * 50) + 12
                 };
                 
+                // Save to Database instantly
                 db.ref('users/' + mobile).set(newUser).then(() => {
                     localStorage.setItem("smartEarnUser", JSON.stringify(newUser));
-                    alert(`🎉 Registration Successful! Your ID: ${myUniqueId}`);
+                    alert(`🎉 Registration Successful!\n\nYour User ID: ${myUniqueId}\n₹50 Bonus Added to your wallet!`);
                     window.location.href = "game.html"; 
                 });
-            }).catch(() => {
-                alert("❌ Invalid OTP!");
-                document.getElementById("verify-btn").innerText = "Verify & Register";
+            }).catch(err => {
+                alert("Error connecting to server. Please try again.");
+                btn.innerText = "Register Now";
+                btn.disabled = false;
             });
         }
 
+        // =========================
+        // 3. FORGOT PASSWORD (Using Free Dummy OTP)
+        // =========================
         function sendForgotOTP() {
             let mobile = document.getElementById("fg-mobile").value;
+            if(mobile.length !== 10) return alert("Enter 10-digit mobile number");
+
             db.ref('users/' + mobile).once('value').then(s => {
-                if(!s.exists()) return alert("User not found!");
+                if(!s.exists()) return alert("❌ User not found!");
                 tempForgotPhone = mobile;
-                alert("For testing, OTP: 123456");
+                // Free Testing OTP (No SMS cost)
+                alert("For System Check: OTP is 123456");
                 showSection('forgot-otp-sec');
             });
         }
-        function verifyForgotOTP() { if(document.getElementById('fg-otp').value === "123456") showSection('forgot-newpass-sec'); }
+        
+        function verifyForgotOTP() { 
+            if(document.getElementById('fg-otp').value === "123456") {
+                showSection('forgot-newpass-sec'); 
+            } else {
+                alert("❌ Invalid OTP!");
+            }
+        }
+        
         function saveNewPassword() {
-            db.ref('users/' + tempForgotPhone).update({password: document.getElementById('fg-new-pass').value})
-            .then(() => { alert("Updated!"); showSection('login-section'); });
+            let newPass = document.getElementById('fg-new-pass').value;
+            let confPass = document.getElementById('fg-conf-pass').value;
+
+            if(newPass.length < 4) return alert("Password must be at least 4 characters!");
+            if(newPass !== confPass) return alert("Passwords do not match!");
+
+            db.ref('users/' + tempForgotPhone).update({password: newPass})
+            .then(() => { 
+                alert("✅ Password Updated Successfully!"); 
+                showSection('login-section'); 
+            });
         }
     </script>
 </body>
