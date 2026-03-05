@@ -7,6 +7,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0e14; color: #e2e8f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px 0; }
@@ -41,9 +42,11 @@
     </style>
 
     <script>
+        // 🔥 यहाँ मैंने आपकी DATABASE URL जोड़ दी है 🔥
         const firebaseConfig = {
             apiKey: "AIzaSyC1X3E6WPLXn1HTWvcP25yUBmKlvraiHHs",
             authDomain: "smart-earn-459ec.firebaseapp.com",
+            databaseURL: "https://smart-earn-459ec-default-rtdb.firebaseio.com", 
             projectId: "smart-earn-459ec",
             storageBucket: "smart-earn-459ec.firebasestorage.app",
             messagingSenderId: "314834673807",
@@ -107,7 +110,6 @@
             <div class="text-link" onclick="showSection('login-section')">Already have an account? Login</div>
         </div>
 
-
         <div id="forgot-mobile-sec">
             <div class="subtitle" style="color:#ff4d4d; background:rgba(255,77,77,0.1);">Reset Password</div>
             <div class="input-group">
@@ -154,7 +156,7 @@
                 document.getElementById('reg-ref').readOnly = true; 
             }
             
-            // अगर यूज़र पहले से लॉग इन है, तो सीधा गेम में भेजें
+            // Auto Login if user is already registered
             let saved = localStorage.getItem('smartEarnUser');
             if(saved) {
                 window.location.href = "game.html";
@@ -167,9 +169,6 @@
             document.getElementById(sectionId).style.display = 'block';
         }
 
-        // =========================
-        // 1. LOGIN LOGIC
-        // =========================
         function loginUser() {
             let loginId = document.getElementById('log-id').value.trim();
             let loginPass = document.getElementById('log-pass').value;
@@ -185,22 +184,19 @@
                 
                 if(user) {
                     localStorage.setItem('smartEarnUser', JSON.stringify(user));
-                    window.location.href = "game.html";
+                    window.location.href = "game.html"; // 🔥 Redirect to Game
                 } else { 
                     alert("❌ Invalid Mobile/ID or Password!"); 
                     btn.innerText = "Login Now";
                     btn.disabled = false;
                 }
             }).catch(err => {
-                alert("Network Error!");
+                alert("Network Error: " + err.message);
                 btn.innerText = "Login Now";
                 btn.disabled = false;
             });
         }
 
-        // =========================
-        // 2. DIRECT REGISTER LOGIC (NO OTP)
-        // =========================
         function registerUser() {
             let name = document.getElementById("reg-name").value.trim();
             let mobile = document.getElementById("reg-mobile").value.trim();
@@ -215,7 +211,6 @@
             btn.innerText = "Creating Account...";
             btn.disabled = true;
 
-            // Check if mobile already exists
             db.ref('users/' + mobile).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
                     alert("❌ Number already registered. Please Login.");
@@ -224,7 +219,6 @@
                     return;
                 }
 
-                // Generate Unique ID
                 let myUniqueId = "SE-" + Math.floor(1000 + Math.random() * 9000);
                 
                 let newUser = { 
@@ -241,22 +235,23 @@
                     fakeTeam: Math.floor(Math.random() * 50) + 12
                 };
                 
-                // Save to Database instantly
                 db.ref('users/' + mobile).set(newUser).then(() => {
                     localStorage.setItem("smartEarnUser", JSON.stringify(newUser));
-                    alert(`🎉 Registration Successful!\n\nYour User ID: ${myUniqueId}\n₹50 Bonus Added to your wallet!`);
-                    window.location.href = "game.html"; 
+                    alert(`🎉 Registration Successful!\n\nYour User ID: ${myUniqueId}\n₹50 Bonus Added!`);
+                    window.location.href = "game.html"; // 🔥 Redirect to Game
+                }).catch(err => {
+                    alert("Failed to save data. Check internet.");
+                    btn.innerText = "Register Now";
+                    btn.disabled = false;
                 });
             }).catch(err => {
-                alert("Error connecting to server. Please try again.");
+                alert("Error connecting to server.");
                 btn.innerText = "Register Now";
                 btn.disabled = false;
             });
         }
 
-        // =========================
-        // 3. FORGOT PASSWORD (Using Free Dummy OTP)
-        // =========================
+        // FORGOT PASSWORD
         function sendForgotOTP() {
             let mobile = document.getElementById("fg-mobile").value;
             if(mobile.length !== 10) return alert("Enter 10-digit mobile number");
@@ -264,7 +259,6 @@
             db.ref('users/' + mobile).once('value').then(s => {
                 if(!s.exists()) return alert("❌ User not found!");
                 tempForgotPhone = mobile;
-                // Free Testing OTP (No SMS cost)
                 alert("For System Check: OTP is 123456");
                 showSection('forgot-otp-sec');
             });
