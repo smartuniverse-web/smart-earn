@@ -1,0 +1,16 @@
+{
+  "name": "Smart Earn",
+  "short_name": "Smart Earn",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0b0e14",
+  "theme_color": "#151a25",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
