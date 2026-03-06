@@ -40,17 +40,22 @@
 
         .history-box { background: #151a25; border: 1px solid #2a2f3a; border-radius: 15px; padding: 20px;}
         .hist-title { color: #f3ba2f; font-size: 14px; text-transform: uppercase; font-weight: bold; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px;}
-        .hist-row { display: flex; justify-content: space-between; align-items: center; background: #0b0e14; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #00ff88;}
+        .hist-row { display: flex; justify-content: space-between; align-items: center; background: #0b0e14; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #f3ba2f;}
+        .hist-row.success { border-left: 3px solid #00ff88;}
+        .hist-row.rejected { border-left: 3px solid #ff4d4d;}
         .hist-info p { font-size: 13px; color: #fff; font-weight: bold; margin-bottom: 3px;}
         .hist-info small { font-size: 10px; color: #a0a5b1;}
-        .hist-amt { font-size: 16px; color: #00ff88; font-weight: bold;}
-        .hist-status { font-size: 11px; background: rgba(0,255,136,0.1); color: #00ff88; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; font-weight: bold;}
+        .hist-amt { font-size: 16px; color: #fff; font-weight: bold;}
+        .hist-status { font-size: 11px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; font-weight: bold;}
+        .status-pending { background: rgba(243,186,47,0.1); color: #f3ba2f; }
+        .status-success { background: rgba(0,255,136,0.1); color: #00ff88; }
+        .status-rejected { background: rgba(255,77,77,0.1); color: #ff4d4d; }
         
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(243,186,47,0.4); } 70% { box-shadow: 0 0 0 15px rgba(243,186,47,0); } 100% { box-shadow: 0 0 0 0 rgba(243,186,47,0); } }
 
         /* POPUP CSS */
-        .payment-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);}
-        .payment-modal { background: #151a25; border: 1px solid #f3ba2f; width: 90%; max-width: 380px; border-radius: 15px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative; animation: popUp 0.3s ease-out;}
+        .payment-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); overflow-y: auto;}
+        .payment-modal { background: #151a25; border: 1px solid #f3ba2f; width: 90%; max-width: 380px; border-radius: 15px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative; animation: popUp 0.3s ease-out; margin: 20px 0;}
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #ff4d4d; cursor: pointer; font-weight: bold; }
         .pay-amount-text { font-size: 28px; color: #00ff88; font-weight: bold; margin-bottom: 5px;}
         .qr-container { background: #fff; padding: 10px; border-radius: 10px; display: inline-block; margin: 15px 0;}
@@ -65,15 +70,22 @@
         .btn-gp { background: #1a73e8; }
         .btn-pt { background: #002e6e; }
         .utr-section { background: rgba(0,255,136,0.05); border: 1px dashed #00ff88; padding: 15px; border-radius: 10px;}
-        .utr-section input { width: 100%; background: #0b0e14; border: 1px solid #00ff88; padding: 12px; border-radius: 8px; color: #fff; font-weight: bold; text-align: center; margin-bottom: 10px; outline: none;}
-        .utr-section button { width: 100%; background: #00ff88; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase;}
+        .utr-section input[type="number"] { width: 100%; background: #0b0e14; border: 1px solid #00ff88; padding: 12px; border-radius: 8px; color: #fff; font-weight: bold; text-align: center; margin-bottom: 10px; outline: none;}
+        
+        /* 🔥 NEW SCREENSHOT CSS 🔥 */
+        .file-upload-box { background: #0b0e14; border: 1px solid #f3ba2f; padding: 10px; border-radius: 8px; margin-bottom: 12px; color: #fff; font-size: 12px; text-align: left;}
+        .file-upload-box input[type="file"] { width: 100%; color: #a0a5b1; margin-top: 5px;}
+        
+        .utr-section button { width: 100%; background: #00ff88; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: 0.3s;}
+        
         @keyframes popUp { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+
     <script>
-        const GATEWAY_KEY = "b8972a60-2106-4b11-bf4e-3cccaf05c64c";
         const MY_UPI = "Q085382425@ybl";
         let userData = {};
 
@@ -88,6 +100,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const storage = firebase.storage(); // 🔥 INITIALIZE STORAGE 🔥
     </script>
 </head>
 <body>
@@ -129,7 +142,7 @@
                 <button class="btn-main" onclick="openPaymentPopup()">Pay Now</button>
             </div>
             <p class="note" style="margin-top:20px; color:#a0a5b1; font-size:11px; text-align:center;">
-                ⚠️ Always enter correct 12-Digit UTR after payment. Our system automatically verifies it with your bank.
+                ⚠️ Always enter correct 12-Digit UTR and attach Screenshot after payment.
             </p>
         </div>
 
@@ -162,9 +175,16 @@
             </div>
 
             <div class="utr-section">
-                <p style="font-size:11px; color:#00ff88; margin-bottom:8px; font-weight:bold;">After payment, enter UTR below:</p>
+                <p style="font-size:11px; color:#00ff88; margin-bottom:8px; font-weight:bold;">After payment, enter details below:</p>
+                
                 <input type="number" id="popup-utr" placeholder="Enter 12-Digit UTR No.">
-                <button id="popup-submit-btn" onclick="submitDeposit()">Verify & Add Money</button>
+                
+                <div class="file-upload-box">
+                    <label>Upload Payment Screenshot:</label>
+                    <input type="file" id="proof-image" accept="image/*">
+                </div>
+
+                <button id="popup-submit-btn" onclick="submitDeposit()">Submit UTR & Proof</button>
             </div>
         </div>
     </div>
@@ -184,7 +204,20 @@
                 document.getElementById('banner-desc').innerText = "Get mega Game Bonus on big deposits!";
             }
             
-            renderHistory();
+            document.getElementById('display-upi').innerText = MY_UPI;
+
+            // REAL-TIME HISTORY LISTENER
+            if(userData.phone) {
+                db.ref('users/' + userData.phone).on('value', (snapshot) => {
+                    if(snapshot.exists()) {
+                        let serverData = snapshot.val();
+                        userData.depositHistory = serverData.depositHistory || [];
+                        userData.inrBalance = serverData.inrBalance || 0;
+                        localStorage.setItem('smartEarnUser', JSON.stringify(userData));
+                        renderHistory();
+                    }
+                });
+            }
         };
 
         function setAmt(val) { document.getElementById('dep-amt').value = val; }
@@ -196,10 +229,25 @@
                 list.innerHTML = "<p style='text-align:center; color:#a0a5b1; font-size:12px;'>No deposits yet.</p>";
                 return;
             }
+            
             for(let i = userData.depositHistory.length - 1; i >= 0; i--) {
                 let tx = userData.depositHistory[i];
+                let rowClass = "hist-row";
+                let statusClass = "status-pending";
+                let statusText = "⏳ Pending";
+
+                if(tx.status === "Success") {
+                    rowClass += " success";
+                    statusClass = "status-success";
+                    statusText = "✅ Success";
+                } else if(tx.status === "Rejected") {
+                    rowClass += " rejected";
+                    statusClass = "status-rejected";
+                    statusText = "❌ Rejected";
+                }
+
                 list.innerHTML += `
-                <div class="hist-row">
+                <div class="${rowClass}">
                     <div class="hist-info">
                         <p>Deposit via UPI</p>
                         <small>UTR: ${tx.utr}</small><br>
@@ -207,7 +255,7 @@
                     </div>
                     <div style="text-align: right;">
                         <div class="hist-amt">₹${tx.amount}</div>
-                        <div class="hist-status">✅ Success</div>
+                        <div class="hist-status ${statusClass}">${statusText}</div>
                     </div>
                 </div>`;
             }
@@ -241,93 +289,97 @@
             document.body.removeChild(a);
         }
 
-        // 🔥 FULLY AUTOMATED & STRICT VERIFICATION 🔥
+        // 🔥 UPLOAD & SUBMIT LOGIC 🔥
         function submitDeposit() {
             let amt = parseFloat(document.getElementById('dep-amt').value);
             let utr = document.getElementById('popup-utr').value.trim(); 
+            let fileInput = document.getElementById('proof-image');
+            let file = fileInput.files[0];
 
             if(utr.length !== 12) return alert("❌ Please enter a valid 12-Digit UTR Number.");
+            if(!file) return alert("❌ Please upload the Payment Screenshot!");
 
             let btn = document.getElementById('popup-submit-btn');
-            btn.innerText = "⏳ Verifying Payment...";
+            btn.innerText = "⏳ Verifying UTR...";
             btn.disabled = true;
 
-            // 1. Check if UTR is already used in Firebase to prevent double usage
+            // Step 1: Check UTR
             db.ref('used_utrs/' + utr).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
                     alert("❌ Fraud Detected: Ye UTR pehle hi use ho chuka hai!");
-                    btn.innerText = "Verify & Add Money";
+                    btn.innerText = "Submit UTR & Proof";
                     btn.disabled = false;
                 } else {
-                    // 2. Not used before? Call API for Automatic Check
-                    callUPIGatewayAPI(utr, amt, btn);
+                    // Step 2: Upload Image
+                    uploadImageAndSubmit(amt, utr, file, btn);
                 }
             }).catch(err => {
-                alert("Network error. Check connection.");
-                btn.innerText = "Verify & Add Money";
+                alert("Network error. Please check your internet.");
+                btn.innerText = "Submit UTR & Proof";
                 btn.disabled = false;
             });
         }
 
-        function callUPIGatewayAPI(utr, expectedAmt, btn) {
-            let apiUrl = "https://upigateway.com/api/check_payment_status"; 
-            
-            // Calling UPIGateway API
-            fetch(apiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    client_txn_id: utr, 
-                    api_key: GATEWAY_KEY 
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // STRICT CHECK: Paisa tabhi add hoga jab API exactly SUCCESS bolegi
-                if(data.status === true || data.status === "SUCCESS") {
-                    
-                    // Optional Check: You can also verify if amount matches if API returns it
-                    // if(data.data.amount >= expectedAmt) { ... }
-                    
-                    processFinalDeposit(expectedAmt, utr);
+        function uploadImageAndSubmit(amt, utr, file, btn) {
+            btn.innerText = "⏳ Uploading Proof...";
+            let storageRef = storage.ref('deposit_proofs/' + utr + '_' + Date.now());
+            let uploadTask = storageRef.put(file);
 
-                } else {
-                    // API FAILED TO FIND PAYMENT
-                    alert("❌ Payment Not Found!\n\nYe UTR Invalid hai ya Bank se abhi confirm nahi hua hai. Kripya sahi UTR daalein.");
-                    btn.innerText = "Verify & Add Money";
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    btn.innerText = `⏳ Uploading ${Math.floor(progress)}%`;
+                }, 
+                (error) => {
+                    alert("❌ Image upload failed! Try again.");
+                    btn.innerText = "Submit UTR & Proof";
                     btn.disabled = false;
+                }, 
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        btn.innerText = "⏳ Verifying with Bank...";
+                        setTimeout(() => {
+                            processPendingDeposit(amt, utr, downloadURL);
+                        }, 2000); // Smart Delay Effect
+                    });
                 }
-            })
-            .catch(error => {
-                alert("❌ Gateway Error!\n\nServer se connection nahi ho paya. Thodi der baad try karein.");
-                btn.innerText = "Verify & Add Money";
-                btn.disabled = false;
-            });
+            );
         }
 
-        function processFinalDeposit(amt, utr) {
-            let bonusAmount = 0;
-            if(amt >= 10000) bonusAmount = 1500;
-            else if(amt >= 5000) bonusAmount = 600;
-            else if(amt >= 1000) bonusAmount = 100;
-            else if(amt >= 500 && userData.firstDepositDone === false) bonusAmount = 50;
-            else if(amt >= 299 && userData.firstDepositDone === false) bonusAmount = 30;
-
-            userData.firstDepositDone = true;
-            userData.lockedBonus = (userData.lockedBonus || 0) + bonusAmount;
-            userData.hasDeposited = true; 
-            userData.inrBalance = (parseFloat(userData.inrBalance) || 0) + amt + bonusAmount;
-
+        function processPendingDeposit(amt, utr, proofUrl) {
             let dateStr = new Date().toLocaleString();
-            userData.depositHistory.push({ amount: amt, utr: utr, date: dateStr, status: "Success" });
+            let newDeposit = { amount: amt, utr: utr, date: dateStr, status: "Pending", proof: proofUrl };
+            
+            userData.depositHistory.push(newDeposit);
 
-            // Locking UTR in Database and adding money
             if(userData.phone) {
-                db.ref('used_utrs/' + utr).set({ usedBy: userData.phone, amount: amt, date: dateStr });
-                db.ref('users/' + userData.phone).update(userData).then(() => {
+                // Lock UTR
+                db.ref('used_utrs/' + utr).set({ usedBy: userData.phone, amount: amt, date: dateStr, status: "Pending" });
+                
+                // Send to Admin
+                db.ref('admin_deposit_requests/' + utr).set({
+                    phone: userData.phone,
+                    amount: amt,
+                    utr: utr,
+                    date: dateStr,
+                    status: "Pending",
+                    proofUrl: proofUrl // Admin ke paas photo ki link jayegi
+                });
+
+                // Update User Profile
+                db.ref('users/' + userData.phone).update({ depositHistory: userData.depositHistory }).then(() => {
                     localStorage.setItem('smartEarnUser', JSON.stringify(userData));
-                    alert(`✅ PAYMENT VERIFIED!\n\n₹${amt} automatically added to your wallet.\nBonus: ₹${bonusAmount}`);
-                    window.location.href = "game.html"; 
+                    
+                    alert(`✅ Proof Submitted Successfully!\n\nBank server is slightly slow. Your ₹${amt} will be automatically added to your wallet in 1-2 minutes.`);
+                    
+                    closePaymentPopup();
+                    document.getElementById('popup-utr').value = "";
+                    document.getElementById('proof-image').value = "";
+                    let btn = document.getElementById('popup-submit-btn');
+                    btn.innerText = "Submit UTR & Proof";
+                    btn.disabled = false;
+                    
+                    renderHistory();
                 });
             }
         }
