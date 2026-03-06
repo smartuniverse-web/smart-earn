@@ -72,7 +72,6 @@
         .utr-section { background: rgba(0,255,136,0.05); border: 1px dashed #00ff88; padding: 15px; border-radius: 10px;}
         .utr-section input[type="number"] { width: 100%; background: #0b0e14; border: 1px solid #00ff88; padding: 12px; border-radius: 8px; color: #fff; font-weight: bold; text-align: center; margin-bottom: 10px; outline: none;}
         
-        /* 🔥 NEW SCREENSHOT CSS 🔥 */
         .file-upload-box { background: #0b0e14; border: 1px solid #f3ba2f; padding: 10px; border-radius: 8px; margin-bottom: 12px; color: #fff; font-size: 12px; text-align: left;}
         .file-upload-box input[type="file"] { width: 100%; color: #a0a5b1; margin-top: 5px;}
         
@@ -83,7 +82,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
 
     <script>
         const MY_UPI = "Q085382425@ybl";
@@ -100,7 +98,6 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const storage = firebase.storage(); // 🔥 INITIALIZE STORAGE 🔥
     </script>
 </head>
 <body>
@@ -206,7 +203,6 @@
             
             document.getElementById('display-upi').innerText = MY_UPI;
 
-            // REAL-TIME HISTORY LISTENER
             if(userData.phone) {
                 db.ref('users/' + userData.phone).on('value', (snapshot) => {
                     if(snapshot.exists()) {
@@ -289,7 +285,6 @@
             document.body.removeChild(a);
         }
 
-        // 🔥 UPLOAD & SUBMIT LOGIC 🔥
         function submitDeposit() {
             let amt = parseFloat(document.getElementById('dep-amt').value);
             let utr = document.getElementById('popup-utr').value.trim(); 
@@ -300,18 +295,16 @@
             if(!file) return alert("❌ Please upload the Payment Screenshot!");
 
             let btn = document.getElementById('popup-submit-btn');
-            btn.innerText = "⏳ Verifying UTR...";
+            btn.innerText = "⏳ Checking UTR...";
             btn.disabled = true;
 
-            // Step 1: Check UTR
             db.ref('used_utrs/' + utr).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
                     alert("❌ Fraud Detected: Ye UTR pehle hi use ho chuka hai!");
                     btn.innerText = "Submit UTR & Proof";
                     btn.disabled = false;
                 } else {
-                    // Step 2: Upload Image
-                    uploadImageAndSubmit(amt, utr, file, btn);
+                    processImageAndSubmit(amt, utr, file, btn);
                 }
             }).catch(err => {
                 alert("Network error. Please check your internet.");
@@ -320,53 +313,75 @@
             });
         }
 
-        function uploadImageAndSubmit(amt, utr, file, btn) {
-            btn.innerText = "⏳ Uploading Proof...";
-            let storageRef = storage.ref('deposit_proofs/' + utr + '_' + Date.now());
-            let uploadTask = storageRef.put(file);
+        // 🔥 NO API KEY NEEDED: SMART IMAGE COMPRESSOR (BASE64) 🔥
+        function processImageAndSubmit(amt, utr, file, btn) {
+            btn.innerText = "⏳ Processing Proof...";
 
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    btn.innerText = `⏳ Uploading ${Math.floor(progress)}%`;
-                }, 
-                (error) => {
-                    alert("❌ Image upload failed! Try again.");
-                    btn.innerText = "Submit UTR & Proof";
-                    btn.disabled = false;
-                }, 
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        btn.innerText = "⏳ Verifying with Bank...";
-                        setTimeout(() => {
-                            processPendingDeposit(amt, utr, downloadURL);
-                        }, 2000); // Smart Delay Effect
-                    });
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                let img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    let canvas = document.createElement("canvas");
+                    let ctx = canvas.getContext("2d");
+
+                    // Compress Image Size
+                    let MAX_WIDTH = 500;
+                    let MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert directly to Code (Base64 String)
+                    let base64String = canvas.toDataURL("image/jpeg", 0.4); 
+
+                    btn.innerText = "⏳ Verifying...";
+                    setTimeout(() => {
+                        processPendingDeposit(amt, utr, base64String);
+                    }, 1500);
                 }
-            );
+            };
+            reader.onerror = function() {
+                alert("❌ Image process failed!");
+                btn.innerText = "Submit UTR & Proof";
+                btn.disabled = false;
+            };
         }
 
-        function processPendingDeposit(amt, utr, proofUrl) {
+        function processPendingDeposit(amt, utr, proofBase64) {
             let dateStr = new Date().toLocaleString();
-            let newDeposit = { amount: amt, utr: utr, date: dateStr, status: "Pending", proof: proofUrl };
+            // User ki history me photo nahi dikhani, isliye proof sirf admin ke liye save hoga
+            let newDeposit = { amount: amt, utr: utr, date: dateStr, status: "Pending" };
             
             userData.depositHistory.push(newDeposit);
 
             if(userData.phone) {
-                // Lock UTR
                 db.ref('used_utrs/' + utr).set({ usedBy: userData.phone, amount: amt, date: dateStr, status: "Pending" });
                 
-                // Send to Admin
                 db.ref('admin_deposit_requests/' + utr).set({
                     phone: userData.phone,
                     amount: amt,
                     utr: utr,
                     date: dateStr,
                     status: "Pending",
-                    proofUrl: proofUrl // Admin ke paas photo ki link jayegi
+                    proofImage: proofBase64 // 🔥 Direct Database Me Photo Save 🔥
                 });
 
-                // Update User Profile
                 db.ref('users/' + userData.phone).update({ depositHistory: userData.depositHistory }).then(() => {
                     localStorage.setItem('smartEarnUser', JSON.stringify(userData));
                     
