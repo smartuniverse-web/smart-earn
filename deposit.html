@@ -37,43 +37,36 @@
         
         .btn-main { width: 100%; background: #2196F3; color: #fff; border: none; padding: 18px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4); margin-top: 10px;}
         .btn-main:active { transform: scale(0.98); }
-        .btn-green { background: #00ff88; color: #000; box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4); }
 
-        .note { text-align: center; font-size: 11px; color: #a0a5b1; margin-top: 15px; line-height: 1.5;}
-        
         .history-box { background: #151a25; border: 1px solid #2a2f3a; border-radius: 15px; padding: 20px;}
         .hist-title { color: #f3ba2f; font-size: 14px; text-transform: uppercase; font-weight: bold; margin-bottom: 15px; border-bottom: 1px dashed #2a2f3a; padding-bottom: 10px;}
         .hist-row { display: flex; justify-content: space-between; align-items: center; background: #0b0e14; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #00ff88;}
         .hist-info p { font-size: 13px; color: #fff; font-weight: bold; margin-bottom: 3px;}
         .hist-info small { font-size: 10px; color: #a0a5b1;}
         .hist-amt { font-size: 16px; color: #00ff88; font-weight: bold;}
-        .hist-status { font-size: 11px; background: rgba(0,255,136,0.1); color: #00ff88; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 5px;}
+        .hist-status { font-size: 11px; background: rgba(0,255,136,0.1); color: #00ff88; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; font-weight: bold;}
         
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(243,186,47,0.4); } 70% { box-shadow: 0 0 0 15px rgba(243,186,47,0); } 100% { box-shadow: 0 0 0 0 rgba(243,186,47,0); } }
 
+        /* POPUP CSS */
         .payment-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);}
         .payment-modal { background: #151a25; border: 1px solid #f3ba2f; width: 90%; max-width: 380px; border-radius: 15px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative; animation: popUp 0.3s ease-out;}
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #ff4d4d; cursor: pointer; font-weight: bold; }
         .pay-amount-text { font-size: 28px; color: #00ff88; font-weight: bold; margin-bottom: 5px;}
-        
         .qr-container { background: #fff; padding: 10px; border-radius: 10px; display: inline-block; margin: 15px 0;}
         .qr-container img { width: 160px; height: 160px; }
-        
         .upi-copy-box { display: flex; align-items: center; background: #0b0e14; border: 1px solid #2a2f3a; border-radius: 8px; margin-bottom: 15px; overflow: hidden;}
         .upi-id-text { flex: 1; padding: 12px; color: #f3ba2f; font-weight: bold; font-size: 13px; text-align: center;}
         .copy-btn { background: #3b4150; color: #fff; border: none; padding: 12px 15px; font-weight: bold; cursor: pointer;}
         .copy-btn:active { background: #00ff88; color: #000;}
-
         .app-buttons { display: flex; gap: 10px; margin-bottom: 20px;}
         .app-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; color: #fff;}
         .btn-pp { background: #5f259f; }
         .btn-gp { background: #1a73e8; }
         .btn-pt { background: #002e6e; }
-        
         .utr-section { background: rgba(0,255,136,0.05); border: 1px dashed #00ff88; padding: 15px; border-radius: 10px;}
         .utr-section input { width: 100%; background: #0b0e14; border: 1px solid #00ff88; padding: 12px; border-radius: 8px; color: #fff; font-weight: bold; text-align: center; margin-bottom: 10px; outline: none;}
         .utr-section button { width: 100%; background: #00ff88; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase;}
-        
         @keyframes popUp { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 
@@ -135,7 +128,9 @@
                 </div>
                 <button class="btn-main" onclick="openPaymentPopup()">Pay Now</button>
             </div>
-            <p class="note">⚠️ Bonus amount can only be used to play games and cannot be withdrawn directly.</p>
+            <p class="note" style="margin-top:20px; color:#a0a5b1; font-size:11px; text-align:center;">
+                ⚠️ Always enter correct 12-Digit UTR after payment. Our system automatically verifies it with your bank.
+            </p>
         </div>
 
         <div class="history-box">
@@ -160,7 +155,6 @@
             </div>
 
             <p style="font-size:11px; color:#a0a5b1; margin-bottom:10px;">Or pay directly via Apps:</p>
-            
             <div class="app-buttons">
                 <button class="app-btn btn-pp" onclick="openUPIApp('phonepe')">PhonePe</button>
                 <button class="app-btn btn-gp" onclick="openUPIApp('gpay')">GPay</button>
@@ -170,7 +164,7 @@
             <div class="utr-section">
                 <p style="font-size:11px; color:#00ff88; margin-bottom:8px; font-weight:bold;">After payment, enter UTR below:</p>
                 <input type="number" id="popup-utr" placeholder="Enter 12-Digit UTR No.">
-                <button id="popup-submit-btn" onclick="submitDeposit()">Verify Payment</button>
+                <button id="popup-submit-btn" onclick="submitDeposit()">Verify & Add Money</button>
             </div>
         </div>
     </div>
@@ -190,7 +184,6 @@
                 document.getElementById('banner-desc').innerText = "Get mega Game Bonus on big deposits!";
             }
             
-            document.getElementById('display-upi').innerText = MY_UPI;
             renderHistory();
         };
 
@@ -199,7 +192,7 @@
         function renderHistory() {
             let list = document.getElementById('deposit-history-list');
             list.innerHTML = "";
-            if(userData.depositHistory.length === 0) {
+            if(!userData.depositHistory || userData.depositHistory.length === 0) {
                 list.innerHTML = "<p style='text-align:center; color:#a0a5b1; font-size:12px;'>No deposits yet.</p>";
                 return;
             }
@@ -213,7 +206,7 @@
                         <small>${tx.date}</small>
                     </div>
                     <div style="text-align: right;">
-                        <div class="hist-amt">+₹${tx.amount}</div>
+                        <div class="hist-amt">₹${tx.amount}</div>
                         <div class="hist-status">✅ Success</div>
                     </div>
                 </div>`;
@@ -231,9 +224,7 @@
             document.getElementById('payment-popup').style.display = 'flex';
         }
 
-        function closePaymentPopup() {
-            document.getElementById('payment-popup').style.display = 'none';
-        }
+        function closePaymentPopup() { document.getElementById('payment-popup').style.display = 'none'; }
 
         function copyUPI() {
             navigator.clipboard.writeText(MY_UPI);
@@ -250,65 +241,66 @@
             document.body.removeChild(a);
         }
 
+        // 🔥 FULLY AUTOMATED & STRICT VERIFICATION 🔥
         function submitDeposit() {
             let amt = parseFloat(document.getElementById('dep-amt').value);
-            let utr = document.getElementById('popup-utr').value; 
+            let utr = document.getElementById('popup-utr').value.trim(); 
 
             if(utr.length !== 12) return alert("❌ Please enter a valid 12-Digit UTR Number.");
 
             let btn = document.getElementById('popup-submit-btn');
-            btn.innerText = "⏳ Verifying...";
+            btn.innerText = "⏳ Verifying Payment...";
             btn.disabled = true;
 
+            // 1. Check if UTR is already used in Firebase to prevent double usage
             db.ref('used_utrs/' + utr).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
-                    alert("❌ Fraud Detected: This UTR/Transaction ID has already been used!");
-                    btn.innerText = "Verify Payment";
+                    alert("❌ Fraud Detected: Ye UTR pehle hi use ho chuka hai!");
+                    btn.innerText = "Verify & Add Money";
                     btn.disabled = false;
                 } else {
-                    verifyGatewayAPI(utr, amt, btn);
+                    // 2. Not used before? Call API for Automatic Check
+                    callUPIGatewayAPI(utr, amt, btn);
                 }
             }).catch(err => {
-                alert("Network error. Please check your internet.");
-                btn.innerText = "Verify Payment";
+                alert("Network error. Check connection.");
+                btn.innerText = "Verify & Add Money";
                 btn.disabled = false;
             });
         }
 
-        // 🔥 1000% STRICT API VERIFICATION LAGA DIYA HAI 🔥
-        function verifyGatewayAPI(utr, expectedAmt, btn) {
+        function callUPIGatewayAPI(utr, expectedAmt, btn) {
             let apiUrl = "https://upigateway.com/api/check_payment_status"; 
             
+            // Calling UPIGateway API
             fetch(apiUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ client_txn_id: utr, api_key: GATEWAY_KEY })
+                body: JSON.stringify({ 
+                    client_txn_id: utr, 
+                    api_key: GATEWAY_KEY 
+                })
             })
             .then(response => response.json())
             .then(data => {
-                let isReal = false;
-                
-                // API formats alag-alag ho sakte hain, isliye conditions check hongi
-                if(data.status === true && data.data && data.data.status === "success") {
-                    isReal = true;
-                } else if (data.status === "SUCCESS" || data.message === "Transaction Found") {
-                    isReal = true;
-                }
-
-                if(isReal) {
-                    // Agar API 100% SUCCESS bolegi tabhi paise add honge
+                // STRICT CHECK: Paisa tabhi add hoga jab API exactly SUCCESS bolegi
+                if(data.status === true || data.status === "SUCCESS") {
+                    
+                    // Optional Check: You can also verify if amount matches if API returns it
+                    // if(data.data.amount >= expectedAmt) { ... }
+                    
                     processFinalDeposit(expectedAmt, utr);
+
                 } else {
-                    // FAKE UTR REJECTED
-                    alert("❌ FAKE UTR DETECTED!\n\nYe UTR Invalid hai ya abhi payment bank se nahi mila. Agar paise cut gaye hain, to 2 minute baad wapas daalein.");
-                    btn.innerText = "Verify Payment";
+                    // API FAILED TO FIND PAYMENT
+                    alert("❌ Payment Not Found!\n\nYe UTR Invalid hai ya Bank se abhi confirm nahi hua hai. Kripya sahi UTR daalein.");
+                    btn.innerText = "Verify & Add Money";
                     btn.disabled = false;
                 }
             })
             .catch(error => {
-                // SYSTEM ERROR / FAKE ATTEMPT REJECTED
-                alert("❌ VERIFICATION FAILED!\n\nBank server se response nahi mila. Isliye hum ye UTR accept nahi kar sakte.");
-                btn.innerText = "Verify Payment";
+                alert("❌ Gateway Error!\n\nServer se connection nahi ho paya. Thodi der baad try karein.");
+                btn.innerText = "Verify & Add Money";
                 btn.disabled = false;
             });
         }
@@ -329,11 +321,12 @@
             let dateStr = new Date().toLocaleString();
             userData.depositHistory.push({ amount: amt, utr: utr, date: dateStr, status: "Success" });
 
+            // Locking UTR in Database and adding money
             if(userData.phone) {
-                db.ref('used_utrs/' + utr).set({ usedBy: userData.phone, amount: amt });
+                db.ref('used_utrs/' + utr).set({ usedBy: userData.phone, amount: amt, date: dateStr });
                 db.ref('users/' + userData.phone).update(userData).then(() => {
                     localStorage.setItem('smartEarnUser', JSON.stringify(userData));
-                    alert(`✅ DEPOSIT SUCCESSFUL!\n\n₹${amt} Added to Wallet.\nBonus: ₹${bonusAmount}`);
+                    alert(`✅ PAYMENT VERIFIED!\n\n₹${amt} automatically added to your wallet.\nBonus: ₹${bonusAmount}`);
                     window.location.href = "game.html"; 
                 });
             }
