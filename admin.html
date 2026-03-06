@@ -93,7 +93,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <script>
-        // ✅ यहाँ आपका पूरा Firebase Config और Database URL फिट है
         const firebaseConfig = {
             apiKey: "AIzaSyC1X3E6WPLXn1HTWvcP25yUBmKlvraiHHs",
             authDomain: "smart-earn-459ec.firebaseapp.com",
@@ -134,7 +133,7 @@
         <div class="stats-grid">
             <div class="stat-card blue"><pre><h3>Total Registered Users</h3><h1 id="stat-users">0</h1></pre></div>
             <div class="stat-card"><pre><h3>Total User Wallets (Liability)</h3><h1 id="stat-wallet">₹0</h1></pre></div>
-            <div class="stat-card yellow"><pre><h3>Total Deposits Today</h3><h1 id="stat-dep">₹0</h1></pre></div>
+            <div class="stat-card yellow"><pre><h3>Total Deposits Approved</h3><h1 id="stat-dep">₹0</h1></pre></div>
             <div class="stat-card red"><pre><h3>Pending Withdrawals</h3><h1 id="stat-wit">0</h1></pre></div>
         </div>
 
@@ -242,7 +241,17 @@
         </div>
 
         <div id="deposits-sec" class="data-section">
-            <div class="sec-title">💰 Live Deposit History</div>
+            <div class="sec-title" style="color:#f3ba2f;">⏳ Pending Deposit Requests</div>
+            <table>
+                <thead><tr><th>Mobile (User)</th><th>Amount</th><th>UTR Number</th><th>Date & Time</th><th>Screenshot</th><th>Action</th></tr></thead>
+                <tbody id="pending-deposits-table-body">
+                    <tr><td colspan="6" style="text-align:center;">Loading requests...</td></tr>
+                </tbody>
+            </table>
+            
+            <br><br>
+
+            <div class="sec-title">✅ Approved & Rejected Deposit History</div>
             <table>
                 <thead><tr><th>Mobile (User)</th><th>Amount</th><th>UTR Number</th><th>Date & Time</th><th>Status</th></tr></thead>
                 <tbody id="deposits-table-body"></tbody>
@@ -331,10 +340,26 @@
         </div>
     </div>
 
+    <div class="team-modal-overlay" id="proofModal" style="z-index: 4000;">
+        <div class="team-modal" style="max-width: 450px; text-align:center;">
+            <span class="close-modal" onclick="closeProofModal()">×</span>
+            <div class="modal-header">Payment Screenshot</div>
+            <img id="proof-img-tag" src="" style="width:100%; max-height:70vh; object-fit:contain; border-radius:10px; margin-bottom:10px;">
+            <p style="color:#a0a5b1; font-size:12px;">Match UTR from this image before Approving.</p>
+        </div>
+    </div>
+
     <script>
         let globalUsersData = {}; 
         let currentViewingRefCode = "";
         let adminTimers = { 15: 15, 30: 30, 60: 60 };
+
+        window.onload = function() { 
+            fetchAllData(); 
+            loadPendingDeposits(); // Load Deposits
+            loadUTRLogs(); 
+            loadQueries(); 
+        };
 
         setTimeout(() => {
             startAdminTimers();
@@ -408,12 +433,6 @@
             .then(() => alert(`✅ ${label} Override Applied for ${timeframe}s game!\nResult will be forced to: ${result}`));
         }
 
-        window.onload = function() { 
-            fetchAllData(); 
-            loadUTRLogs(); 
-            loadQueries(); 
-        };
-
         function searchUsers() {
             let input = document.getElementById("user-search-input").value.toUpperCase();
             let tableAll = document.getElementById("users-table-body");
@@ -476,6 +495,196 @@
             }
         }
 
+        // 🔥 FETCH ALL DATA (Updated for Deposits) 🔥
+        function fetchAllData() {
+            db.ref('users').on('value', (snapshot) => {
+                globalUsersData = snapshot.val() || {};
+                let users = globalUsersData; 
+                let totalUsers = 0, totalWalletBalance = 0, totalDeposits = 0, pendingWithdrawals = 0;
+                let usersHTML = "", primaryHTML = "", depositsHTML = "", withdrawHTML = "";
+
+                for (let phone in users) {
+                    let u = users[phone];
+                    totalUsers++;
+                    totalWalletBalance += (u.inrBalance || 0);
+                    let statusColor = u.accountStatus === "Blocked" ? "text-red" : "text-green";
+                    let isPrimary = u.isPrimary ? true : false;
+                    let primaryBadge = isPrimary ? `<span class="badge-primary">⭐ PRIMARY</span>` : "";
+                    let primaryBtnText = isPrimary ? "Remove Primary" : "Make Primary";
+                    let primaryBtnClass = isPrimary ? "btn-reject" : "btn-primary-set";
+
+                    let rowHTML = `
+                        <tr>
+                            <td class="text-yellow"><a onclick="openTeamModal('${u.myRefCode}')" style="color:#f3ba2f; text-decoration:underline; cursor:pointer;" title="Click for Team Stats">${u.myRefCode}</a></td>
+                            <td>${u.name} ${primaryBadge}</td>
+                            <td>${phone}</td>
+                            <td class="text-green">₹${(u.inrBalance || 0).toFixed(2)}</td>
+                            <td class="${statusColor}">${u.accountStatus || 'Active'}</td>
+                            <td>
+                                <button class="action-badge btn-edit" onclick="editUserBalance('${phone}')">Edit ₹</button>
+                                <button class="action-badge btn-block" onclick="toggleBlockStatus('${phone}', '${u.accountStatus || 'Active'}')">Block</button>
+                                <button class="action-badge ${primaryBtnClass}" onclick="togglePrimaryStatus('${phone}', ${isPrimary})">${primaryBtnText}</button>
+                            </td>
+                        </tr>`;
+
+                    usersHTML += rowHTML;
+                    if(isPrimary) primaryHTML += rowHTML;
+
+                    // Deposit History List (Only show processed ones)
+                    if(u.depositHistory) {
+                        // Reverse array to show newest first
+                        let revHistory = [...u.depositHistory].reverse();
+                        revHistory.forEach(dep => {
+                            let status = dep.status || "Verified";
+                            if(status === "Success" || status === "Verified") {
+                                totalDeposits += parseFloat(dep.amount);
+                                depositsHTML += `<tr><td>${phone}</td><td class="text-green">+₹${dep.amount}</td><td class="text-yellow">${dep.utr}</td><td>${dep.date}</td><td><span class="action-badge btn-approve">✅ Success</span></td></tr>`;
+                            } else if(status === "Rejected") {
+                                depositsHTML += `<tr><td>${phone}</td><td class="text-red">+₹${dep.amount}</td><td class="text-yellow">${dep.utr}</td><td>${dep.date}</td><td><span class="action-badge btn-reject">❌ Rejected</span></td></tr>`;
+                            }
+                        });
+                    }
+
+                    if(u.withdrawHistory) {
+                        u.withdrawHistory.forEach((wit, index) => {
+                            if(wit.status === "Pending") {
+                                pendingWithdrawals++;
+                                withdrawHTML += `<tr><td>${phone}</td><td class="text-red">-₹${wit.amount}</td><td>${wit.method}</td><td>${wit.detail}</td><td>${wit.date}</td>
+                                <td>
+                                    <button class="action-badge btn-approve" onclick="approveWithdraw('${phone}', ${index})">Approve</button>
+                                    <button class="action-badge btn-reject" onclick="rejectWithdraw('${phone}', ${index}, ${wit.amount})">Reject</button>
+                                </td></tr>`;
+                            } else if(wit.status === "Rejected") {
+                                withdrawHTML += `<tr><td>${phone}</td><td class="text-red">-₹${wit.amount}</td><td>${wit.method}</td><td>${wit.detail}</td><td>${wit.date}</td><td><span class="action-badge btn-reject">Rejected</span></td></tr>`;
+                            } else {
+                                withdrawHTML += `<tr><td>${phone}</td><td class="text-red">-₹${wit.amount}</td><td>${wit.method}</td><td>${wit.detail}</td><td>${wit.date}</td><td><span class="action-badge" style="background:rgba(0,255,136,0.1); color:#00ff88; border:1px solid #00ff88;">Approved</span></td></tr>`;
+                            }
+                        });
+                    }
+                }
+                
+                document.getElementById('stat-users').innerText = totalUsers;
+                document.getElementById('stat-wallet').innerText = "₹" + totalWalletBalance.toFixed(2);
+                document.getElementById('stat-dep').innerText = "₹" + totalDeposits.toFixed(2);
+                document.getElementById('stat-wit').innerText = pendingWithdrawals;
+                
+                document.getElementById('users-table-body').innerHTML = usersHTML;
+                document.getElementById('primary-table-body').innerHTML = primaryHTML || "<tr><td colspan='6' style='text-align:center; color:#a0a5b1;'>No Primary Agents Found</td></tr>";
+                
+                document.getElementById('deposits-table-body').innerHTML = depositsHTML;
+                document.getElementById('withdraw-table-body').innerHTML = withdrawHTML;
+                
+                searchUsers(); 
+            });
+        }
+
+        // 🔥 LOAD PENDING DEPOSIT REQUESTS 🔥
+        function loadPendingDeposits() {
+            db.ref('admin_deposit_requests').on('value', snap => {
+                let reqs = snap.val();
+                let tbody = document.getElementById('pending-deposits-table-body');
+                tbody.innerHTML = "";
+                let hasPending = false;
+
+                if(reqs) {
+                    Object.keys(reqs).reverse().forEach(utr => {
+                        let req = reqs[utr];
+                        if(req.status === "Pending") {
+                            hasPending = true;
+                            tbody.innerHTML += `
+                            <tr>
+                                <td>${req.phone}</td>
+                                <td class="text-yellow" style="font-size:16px;">₹${req.amount}</td>
+                                <td style="color:#00ff88; font-weight:bold;">${req.utr}</td>
+                                <td>${req.date}</td>
+                                <td>
+                                    <button class="action-badge" style="background:#3b82f6; color:#fff;" onclick="openProofModal('${req.proofImage}')">👁️ View Image</button>
+                                </td>
+                                <td>
+                                    <button class="action-badge btn-approve" onclick="approveDeposit('${req.utr}', '${req.phone}', ${req.amount})">✅ Approve</button>
+                                    <button class="action-badge btn-reject" onclick="rejectDeposit('${req.utr}', '${req.phone}')">❌ Reject</button>
+                                </td>
+                            </tr>`;
+                        }
+                    });
+                }
+                if(!hasPending) {
+                    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:#a0a5b1;'>No Pending Deposit Requests right now.</td></tr>";
+                }
+            });
+        }
+
+        // 🔥 APPROVE & REJECT DEPOSIT LOGIC 🔥
+        function approveDeposit(utr, phone, amt) {
+            if(!confirm(`💰 Did you receive ₹${amt} for UTR: ${utr}?\n\nClick OK to Add Funds to user's wallet.`)) return;
+
+            let u = globalUsersData[phone];
+            if(!u) return alert("User data not found!");
+
+            amt = parseFloat(amt);
+            
+            // Calculate Bonus (Same as frontend logic)
+            let bonusAmount = 0;
+            if(amt >= 10000) bonusAmount = 1500;
+            else if(amt >= 5000) bonusAmount = 600;
+            else if(amt >= 1000) bonusAmount = 100;
+            else if(amt >= 500 && u.firstDepositDone !== true) bonusAmount = 50;
+            else if(amt >= 299 && u.firstDepositDone !== true) bonusAmount = 30;
+
+            let newBal = (u.inrBalance || 0) + amt + bonusAmount;
+            let newLocked = (u.lockedBonus || 0) + bonusAmount;
+
+            let updatedHistory = u.depositHistory || [];
+            let hIndex = updatedHistory.findIndex(d => d.utr === utr);
+            if(hIndex !== -1) updatedHistory[hIndex].status = "Success";
+            else updatedHistory.push({ amount: amt, utr: utr, date: new Date().toLocaleString(), status: "Success" });
+
+            let updates = {};
+            updates[`users/${phone}/inrBalance`] = newBal;
+            updates[`users/${phone}/lockedBonus`] = newLocked;
+            updates[`users/${phone}/firstDepositDone`] = true;
+            updates[`users/${phone}/hasDeposited`] = true;
+            updates[`users/${phone}/depositHistory`] = updatedHistory;
+            
+            updates[`admin_deposit_requests/${utr}/status`] = "Success";
+            updates[`used_utrs/${utr}/status`] = "Success";
+
+            db.ref().update(updates).then(() => {
+                alert(`✅ SUCCESS! ₹${amt} + ₹${bonusAmount} Bonus added to ${phone}`);
+            });
+        }
+
+        function rejectDeposit(utr, phone) {
+            if(!confirm(`❌ Are you sure you want to REJECT this deposit? Money will not be added.`)) return;
+
+            let u = globalUsersData[phone];
+            if(!u) return alert("User data not found!");
+
+            let updatedHistory = u.depositHistory || [];
+            let hIndex = updatedHistory.findIndex(d => d.utr === utr);
+            if(hIndex !== -1) updatedHistory[hIndex].status = "Rejected";
+            else updatedHistory.push({ amount: 0, utr: utr, date: new Date().toLocaleString(), status: "Rejected" });
+
+            let updates = {};
+            updates[`users/${phone}/depositHistory`] = updatedHistory;
+            updates[`admin_deposit_requests/${utr}/status`] = "Rejected";
+            updates[`used_utrs/${utr}/status`] = "Rejected";
+
+            db.ref().update(updates).then(() => {
+                alert("❌ Deposit Rejected.");
+            });
+        }
+
+        // IMAGE MODAL Logic
+        function openProofModal(base64Image) {
+            if(!base64Image || base64Image === 'undefined') return alert("Screenshot missing!");
+            document.getElementById('proof-img-tag').src = base64Image;
+            document.getElementById('proofModal').style.display = 'flex';
+        }
+        function closeProofModal() {
+            document.getElementById('proofModal').style.display = 'none';
+        }
+
         function approveWithdraw(phone, historyIndex) {
             if(confirm("Did you send the money to this user? Click OK to Approve.")) {
                 db.ref(`users/${phone}/withdrawHistory/${historyIndex}`).update({ status: "Approved" }).then(() => alert("✅ Withdrawal Approved Successfully!"));
@@ -499,7 +708,9 @@
                 if(!data) { container.innerHTML = "<p style='text-align:center;'>No UTR logs found.</p>"; return; }
                 Object.keys(data).reverse().forEach(utr => {
                     let log = data[utr];
-                    container.innerHTML += `<div class="utr-row"><div><strong style="color:#f3ba2f;">UTR: ${utr}</strong><br><small>Mobile: ${log.usedBy}</small></div><div style="text-align:right;"><span style="color:#00ff88; font-weight:bold;">₹${log.amount}</span><br><span class="action-badge btn-approve">AUTO-ADDED</span></div></div>`;
+                    let stsHtml = log.status === "Pending" ? `<span class="action-badge" style="background:rgba(255,215,0,0.2); color:#ffd700;">Pending</span>` : 
+                                  (log.status === "Rejected" ? `<span class="action-badge btn-reject">Rejected</span>` : `<span class="action-badge btn-approve">Verified</span>`);
+                    container.innerHTML += `<div class="utr-row"><div><strong style="color:#f3ba2f;">UTR: ${utr}</strong><br><small>Mobile: ${log.usedBy}</small></div><div style="text-align:right;"><span style="color:#00ff88; font-weight:bold;">₹${log.amount}</span><br>${stsHtml}</div></div>`;
                 });
             });
         }
@@ -550,81 +761,10 @@
             }
         }
 
-        function fetchAllData() {
-            db.ref('users').on('value', (snapshot) => {
-                globalUsersData = snapshot.val() || {};
-                let users = globalUsersData; 
-                let totalUsers = 0, totalWalletBalance = 0, totalDeposits = 0, pendingWithdrawals = 0;
-                let usersHTML = "", primaryHTML = "", depositsHTML = "", withdrawHTML = "";
-
-                for (let phone in users) {
-                    let u = users[phone];
-                    totalUsers++;
-                    totalWalletBalance += (u.inrBalance || 0);
-                    let statusColor = u.accountStatus === "Blocked" ? "text-red" : "text-green";
-                    let isPrimary = u.isPrimary ? true : false;
-                    let primaryBadge = isPrimary ? `<span class="badge-primary">⭐ PRIMARY</span>` : "";
-                    let primaryBtnText = isPrimary ? "Remove Primary" : "Make Primary";
-                    let primaryBtnClass = isPrimary ? "btn-reject" : "btn-primary-set";
-
-                    let rowHTML = `
-                        <tr>
-                            <td class="text-yellow"><a onclick="openTeamModal('${u.myRefCode}')" style="color:#f3ba2f; text-decoration:underline; cursor:pointer;" title="Click for Team Stats">${u.myRefCode}</a></td>
-                            <td>${u.name} ${primaryBadge}</td>
-                            <td>${phone}</td>
-                            <td class="text-green">₹${(u.inrBalance || 0).toFixed(2)}</td>
-                            <td class="${statusColor}">${u.accountStatus || 'Active'}</td>
-                            <td>
-                                <button class="action-badge btn-edit" onclick="editUserBalance('${phone}')">Edit ₹</button>
-                                <button class="action-badge btn-block" onclick="toggleBlockStatus('${phone}', '${u.accountStatus || 'Active'}')">Block</button>
-                                <button class="action-badge ${primaryBtnClass}" onclick="togglePrimaryStatus('${phone}', ${isPrimary})">${primaryBtnText}</button>
-                            </td>
-                        </tr>`;
-
-                    usersHTML += rowHTML;
-                    if(isPrimary) primaryHTML += rowHTML;
-
-                    if(u.depositHistory) {
-                        u.depositHistory.forEach(dep => {
-                            totalDeposits += dep.amount;
-                            depositsHTML += `<tr><td>${phone}</td><td class="text-green">+₹${dep.amount}</td><td class="text-yellow">${dep.utr}</td><td>${dep.date}</td><td><span class="action-badge btn-approve">Verified</span></td></tr>`;
-                        });
-                    }
-
-                    if(u.withdrawHistory) {
-                        u.withdrawHistory.forEach((wit, index) => {
-                            if(wit.status === "Pending") {
-                                pendingWithdrawals++;
-                                withdrawHTML += `<tr><td>${phone}</td><td class="text-red">-₹${wit.amount}</td><td>${wit.method}</td><td>${wit.detail}</td><td>${wit.date}</td>
-                                <td>
-                                    <button class="action-badge btn-approve" onclick="approveWithdraw('${phone}', ${index})">Approve</button>
-                                    <button class="action-badge btn-reject" onclick="rejectWithdraw('${phone}', ${index}, ${wit.amount})">Reject</button>
-                                </td></tr>`;
-                            } else if(wit.status === "Rejected") {
-                                withdrawHTML += `<tr><td>${phone}</td><td class="text-red">-₹${wit.amount}</td><td>${wit.method}</td><td>${wit.detail}</td><td>${wit.date}</td><td><span class="action-badge btn-reject">Rejected</span></td></tr>`;
-                            } else {
-                                withdrawHTML += `<tr><td>${phone}</td><td class="text-red">-₹${wit.amount}</td><td>${wit.method}</td><td>${wit.detail}</td><td>${wit.date}</td><td><span class="action-badge" style="background:rgba(0,255,136,0.1); color:#00ff88; border:1px solid #00ff88;">Approved</span></td></tr>`;
-                            }
-                        });
-                    }
-                }
-                document.getElementById('stat-users').innerText = totalUsers;
-                document.getElementById('stat-wallet').innerText = "₹" + totalWalletBalance.toFixed(2);
-                document.getElementById('stat-dep').innerText = "₹" + totalDeposits.toFixed(2);
-                document.getElementById('stat-wit').innerText = pendingWithdrawals;
-                
-                document.getElementById('users-table-body').innerHTML = usersHTML;
-                document.getElementById('primary-table-body').innerHTML = primaryHTML || "<tr><td colspan='6' style='text-align:center; color:#a0a5b1;'>No Primary Agents Found</td></tr>";
-                
-                document.getElementById('deposits-table-body').innerHTML = depositsHTML;
-                document.getElementById('withdraw-table-body').innerHTML = withdrawHTML;
-                
-                searchUsers(); 
-            });
-        }
-
+        // Team Analytics Functions
         function openTeamModal(refCode) { currentViewingRefCode = refCode; document.getElementById('popup-uid').innerText = refCode; document.getElementById('teamModal').style.display = 'flex'; applyTeamFilter('all'); }
         function closeTeamModal() { document.getElementById('teamModal').style.display = 'none'; }
+        
         function applyTeamFilter(filterType) {
             document.querySelectorAll('.f-btn').forEach(btn => btn.classList.remove('active'));
             if(filterType !== 'custom') document.getElementById('btn-' + filterType).classList.add('active');
@@ -640,6 +780,7 @@
             }
             calculateAndDisplayTeamStats(currentViewingRefCode, startDate, endDate);
         }
+        
         function calculateAndDisplayTeamStats(refCode, startDate, endDate) {
             let directTeam = []; let allTeam = [];
             for(let phone in globalUsersData) {
@@ -659,12 +800,13 @@
             let dirStats = processStats(directTeam, startDate, endDate); let allStats = processStats(allTeam, startDate, endDate);
             updateTeamUI('dir', dirStats); updateTeamUI('all', allStats);
         }
+        
         function processStats(teamArray, startDate, endDate) {
             let totalDep = 0, totalWit = 0, companyProfit = 0, currentBal = 0, totalTurnover = 0;
             teamArray.forEach(u => {
                 currentBal += (u.inrBalance || 0);
-                if(u.depositHistory) u.depositHistory.forEach(dep => { let d = new Date(dep.date); if(d >= startDate && d <= endDate) totalDep += parseFloat(dep.amount); });
-                if(u.withdrawHistory) u.withdrawHistory.forEach(wit => { let d = new Date(wit.date); if(d >= startDate && d <= endDate) totalWit += parseFloat(wit.amount); });
+                if(u.depositHistory) u.depositHistory.forEach(dep => { let d = new Date(dep.date); if(d >= startDate && d <= endDate && dep.status !== "Rejected" && dep.status !== "Pending") totalDep += parseFloat(dep.amount); });
+                if(u.withdrawHistory) u.withdrawHistory.forEach(wit => { let d = new Date(wit.date); if(d >= startDate && d <= endDate && wit.status !== "Rejected") totalWit += parseFloat(wit.amount); });
                 if(u.gameHistory) u.gameHistory.forEach(game => {
                     let d = new Date(game.date);
                     if(d >= startDate && d <= endDate) {
@@ -674,6 +816,7 @@
             });
             return { count: teamArray.length, totalDep, totalWit, companyProfit, currentBal, totalTurnover };
         }
+        
         function updateTeamUI(prefix, stats) {
             document.getElementById(prefix + '-count').innerText = stats.count; document.getElementById(prefix + '-dep').innerText = "₹" + stats.totalDep.toFixed(2);
             document.getElementById(prefix + '-wit').innerText = "₹" + stats.totalWit.toFixed(2); document.getElementById(prefix + '-bal').innerText = "₹" + stats.currentBal.toFixed(2);
