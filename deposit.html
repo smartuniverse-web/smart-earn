@@ -124,7 +124,7 @@
                 <div class="input-group">
                     <div class="amt-input-wrapper">
                         <span>₹</span>
-                        <input type="number" id="dep-amt" class="custom-input" placeholder="0" min="299">
+                        <input type="number" id="dep-amt" class="custom-input" placeholder="0" min="10">
                     </div>
                     <div class="quick-amts">
                         <button class="q-btn" onclick="setAmt(299)">₹299</button>
@@ -224,7 +224,7 @@
         // 🔥 POPUP LOGIC 🔥
         function openPaymentPopup() {
             let amt = parseFloat(document.getElementById('dep-amt').value);
-            if(isNaN(amt) || amt < 299) return alert("❌ Minimum deposit amount is ₹299.");
+            if(isNaN(amt) || amt < 10) return alert("❌ Minimum deposit amount is ₹10.");
 
             // Set amount text
             document.getElementById('popup-amt-display').innerText = amt;
@@ -334,3 +334,4 @@
     </script>
 </body>
 </html>
+
