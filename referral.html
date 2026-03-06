@@ -156,7 +156,8 @@
             if(!saved) { window.location.href = "index.html"; return; }
             userData = JSON.parse(saved);
 
-            document.getElementById('my-ref-link').innerText = window.location.origin + "/index.html?ref=" + userData.myRefCode;
+            // 🔥 Yaha par maine aapki GitHub wali link fix kar di hai 🔥
+            document.getElementById('my-ref-link').innerText = "https://smartuniverse-web.github.io/smart-earn/index.html?ref=" + userData.myRefCode;
 
             if(userData.phone) {
                 db.ref('users/' + userData.phone).on('value', snap => {
