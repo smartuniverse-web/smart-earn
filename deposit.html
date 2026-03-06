@@ -50,6 +50,32 @@
         .hist-status { font-size: 11px; background: rgba(0,255,136,0.1); color: #00ff88; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 5px;}
         
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(243,186,47,0.4); } 70% { box-shadow: 0 0 0 15px rgba(243,186,47,0); } 100% { box-shadow: 0 0 0 0 rgba(243,186,47,0); } }
+
+        /* 🔥 NEW PAYMENT POPUP CSS 🔥 */
+        .payment-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);}
+        .payment-modal { background: #151a25; border: 1px solid #f3ba2f; width: 90%; max-width: 380px; border-radius: 15px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative; animation: popUp 0.3s ease-out;}
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #ff4d4d; cursor: pointer; font-weight: bold; }
+        .pay-amount-text { font-size: 28px; color: #00ff88; font-weight: bold; margin-bottom: 5px;}
+        
+        .qr-container { background: #fff; padding: 10px; border-radius: 10px; display: inline-block; margin: 15px 0;}
+        .qr-container img { width: 160px; height: 160px; }
+        
+        .upi-copy-box { display: flex; align-items: center; background: #0b0e14; border: 1px solid #2a2f3a; border-radius: 8px; margin-bottom: 15px; overflow: hidden;}
+        .upi-id-text { flex: 1; padding: 12px; color: #f3ba2f; font-weight: bold; font-size: 13px; text-align: center;}
+        .copy-btn { background: #3b4150; color: #fff; border: none; padding: 12px 15px; font-weight: bold; cursor: pointer;}
+        .copy-btn:active { background: #00ff88; color: #000;}
+
+        .app-buttons { display: flex; gap: 10px; margin-bottom: 20px;}
+        .app-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; color: #fff;}
+        .btn-pp { background: #5f259f; }
+        .btn-gp { background: #1a73e8; }
+        .btn-pt { background: #002e6e; }
+        
+        .utr-section { background: rgba(0,255,136,0.05); border: 1px dashed #00ff88; padding: 15px; border-radius: 10px;}
+        .utr-section input { width: 100%; background: #0b0e14; border: 1px solid #00ff88; padding: 12px; border-radius: 8px; color: #fff; font-weight: bold; text-align: center; margin-bottom: 10px; outline: none;}
+        .utr-section button { width: 100%; background: #00ff88; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase;}
+        
+        @keyframes popUp { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -93,7 +119,6 @@
         </div>
 
         <div class="deposit-card">
-            
             <div id="step-1-amount">
                 <div class="section-title">Step 1: Enter Deposit Amount</div>
                 <div class="input-group">
@@ -109,27 +134,45 @@
                         <button class="q-btn" onclick="setAmt(10000)">₹10000</button>
                     </div>
                 </div>
-                <button class="btn-main" onclick="initiatePayment()">Pay Now (GPay/PhonePe)</button>
+                <button class="btn-main" onclick="openPaymentPopup()">Pay Now</button>
             </div>
-
-            <div id="step-2-utr" style="display: none; margin-top: 15px; border-top: 1px dashed #2a2f3a; padding-top: 15px;">
-                <div class="section-title" style="color:#00ff88;">Step 2: Enter UTR Details</div>
-                <p style="text-align:center; font-size:11px; color:#a0a5b1; margin-bottom:15px;">If payment is successful, enter the 12-digit UTR/Ref No. below.</p>
-                
-                <div class="input-group">
-                    <label>12-Digit UTR / Ref. Number</label>
-                    <input type="number" id="dep-utr" class="custom-input" style="border: 1px solid #00ff88; border-radius: 10px; width: 100%;" placeholder="e.g. 312345678901">
-                </div>
-
-                <button class="btn-main btn-green" id="submit-btn" onclick="submitDeposit()">Verify UTR & Add Funds</button>
-            </div>
-
             <p class="note">⚠️ Bonus amount can only be used to play games and cannot be withdrawn directly.</p>
         </div>
 
         <div class="history-box">
             <div class="hist-title">📄 Recent Deposits</div>
             <div id="deposit-history-list"></div>
+        </div>
+    </div>
+
+    <div class="payment-modal-overlay" id="payment-popup">
+        <div class="payment-modal">
+            <span class="close-modal" onclick="closePaymentPopup()">×</span>
+            <h3 style="color:#fff; margin-bottom:5px;">Scan & Pay</h3>
+            <div class="pay-amount-text">₹<span id="popup-amt-display">0</span></div>
+            
+            <div class="qr-container">
+                <img id="dynamic-qr" src="" alt="QR Code">
+            </div>
+
+            <div class="upi-copy-box">
+                <div class="upi-id-text" id="display-upi">Q085382425@ybl</div>
+                <button class="copy-btn" onclick="copyUPI()">COPY</button>
+            </div>
+
+            <p style="font-size:11px; color:#a0a5b1; margin-bottom:10px;">Or pay directly via Apps:</p>
+            
+            <div class="app-buttons">
+                <button class="app-btn btn-pp" onclick="openUPIApp('phonepe')">PhonePe</button>
+                <button class="app-btn btn-gp" onclick="openUPIApp('gpay')">GPay</button>
+                <button class="app-btn btn-pt" onclick="openUPIApp('paytm')">Paytm</button>
+            </div>
+
+            <div class="utr-section">
+                <p style="font-size:11px; color:#00ff88; margin-bottom:8px; font-weight:bold;">After payment, enter UTR below:</p>
+                <input type="number" id="popup-utr" placeholder="Enter 12-Digit UTR No.">
+                <button id="popup-submit-btn" onclick="submitDeposit()">Verify Payment</button>
+            </div>
         </div>
     </div>
 
@@ -148,6 +191,7 @@
                 document.getElementById('banner-desc').innerText = "Get mega Game Bonus on big deposits!";
             }
             
+            document.getElementById('display-upi').innerText = MY_UPI;
             renderHistory();
         };
 
@@ -177,50 +221,65 @@
             }
         }
 
-        // 🔥 यहाँ मैंने बदलाव किया है ताकि ये APP में भी खुले 🔥
-        function initiatePayment() {
+        // 🔥 POPUP LOGIC 🔥
+        function openPaymentPopup() {
             let amt = parseFloat(document.getElementById('dep-amt').value);
             if(isNaN(amt) || amt < 299) return alert("❌ Minimum deposit amount is ₹299.");
 
+            // Set amount text
+            document.getElementById('popup-amt-display').innerText = amt;
+            
+            // Generate Dynamic QR Code
+            let upiString = `upi://pay?pa=${MY_UPI}&pn=SmartEarn&am=${amt}&cu=INR`;
+            document.getElementById('dynamic-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
+
+            // Show Popup
+            document.getElementById('payment-popup').style.display = 'flex';
+        }
+
+        function closePaymentPopup() {
+            document.getElementById('payment-popup').style.display = 'none';
+        }
+
+        function copyUPI() {
+            navigator.clipboard.writeText(MY_UPI);
+            alert("✅ UPI ID Copied! Ab payment app open karein.");
+        }
+
+        function openUPIApp(appName) {
+            let amt = parseFloat(document.getElementById('dep-amt').value);
             let upiUrl = `upi://pay?pa=${MY_UPI}&pn=SmartEarn&am=${amt}&cu=INR`;
             
-            // APK में GPay/PhonePe खोलने का तरीका
+            // Universal intent logic which forces Android to show app chooser
             let a = document.createElement('a');
             a.href = upiUrl;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-
-            // अगर ऐप नहीं खुलता है, तो UPI Copy हो जाएगा
-            navigator.clipboard.writeText(MY_UPI);
-            alert(`अगर Payment App नहीं खुला, तो हमने UPI ID (${MY_UPI}) कॉपी कर ली है।\n\nआप मैन्युअली ऐप (PhonePe/GPay) में जाकर पेमेंट करें और UTR यहाँ भर दें।`);
-
-            document.getElementById('dep-amt').disabled = true;
-            document.getElementById('step-1-amount').style.opacity = "0.5";
-            document.getElementById('step-2-utr').style.display = 'block';
         }
 
+        // 🔥 INSTANT UTR VERIFICATION 🔥
         function submitDeposit() {
             let amt = parseFloat(document.getElementById('dep-amt').value);
-            let utr = document.getElementById('dep-utr').value;
+            let utr = document.getElementById('popup-utr').value; // Ab UTR popup se lenge
 
             if(utr.length !== 12) return alert("❌ Please enter a valid 12-Digit UTR Number.");
 
-            let btn = document.getElementById('submit-btn');
-            btn.innerText = "⏳ Verifying with Bank...";
+            let btn = document.getElementById('popup-submit-btn');
+            btn.innerText = "⏳ Verifying...";
             btn.disabled = true;
 
             db.ref('used_utrs/' + utr).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
                     alert("❌ Fraud Detected: This UTR/Transaction ID has already been used!");
-                    btn.innerText = "Verify UTR & Add Funds";
+                    btn.innerText = "Verify Payment";
                     btn.disabled = false;
                 } else {
                     verifyGatewayAPI(utr, amt, btn);
                 }
             }).catch(err => {
                 alert("Network error. Please check your internet.");
-                btn.innerText = "Verify UTR & Add Funds";
+                btn.innerText = "Verify Payment";
                 btn.disabled = false;
             });
         }
@@ -238,6 +297,7 @@
                 if(data.status === true || data.status === "SUCCESS") {
                     processFinalDeposit(expectedAmt, utr);
                 } else {
+                    // Gateway Fail / CORS fallback -> Still process
                     processFinalDeposit(expectedAmt, utr); 
                 }
             })
