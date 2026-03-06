@@ -289,10 +289,17 @@
             }
         };
 
+        // 🔥 FIXED: Added gameHistory so history saves to Firebase 🔥
         function updateBalanceUI() {
             document.getElementById('user-inr').innerText = "₹" + userData.inrBalance.toFixed(2);
             localStorage.setItem('smartEarnUser', JSON.stringify(userData));
-            if(userData.phone) { db.ref('users/' + userData.phone).update({ inrBalance: userData.inrBalance, hookWins: userData.hookWins }).catch(e=>{}); }
+            if(userData.phone) { 
+                db.ref('users/' + userData.phone).update({ 
+                    inrBalance: userData.inrBalance, 
+                    hookWins: userData.hookWins,
+                    gameHistory: userData.gameHistory || []
+                }).catch(e=>{}); 
+            }
         }
 
         function dailyCheckIn() {
@@ -429,7 +436,7 @@
                 let numBets = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
 
                 bets.forEach(b => {
-                    if(b.type === 'DIR') { if(b.value === 'UP') totalUp += b.amount; else totalDown += b.amount; } 
+                    if(b.type === 'DIR') { if(b.value === 'UP') totalUp += b.amount; else totalDown += b.amount; } 
                     else if (b.type === 'NUM') { numBets[b.value] += b.amount; }
                 });
 
@@ -447,7 +454,7 @@
                 // 2. NEW USER HOOK LOGIC (First 2 Bets = 100% Win)
                 let isNewbie = userData.hookWins < 2;
                 if(isNewbie) {
-                    let firstBet = bets[0]; 
+                    let firstBet = bets[0]; 
                     if(firstBet.type === 'DIR') winningDir = firstBet.value;
                     if(firstBet.type === 'NUM') winningNum = firstBet.value;
                     userData.hookWins += 1;
@@ -465,7 +472,7 @@
 
                 bets.forEach(bet => {
                     let isWin = false; let profit = 0;
-                    if(bet.type === 'DIR' && bet.value === winningDir) { isWin = true; profit = bet.amount * 1.9; } 
+                    if(bet.type === 'DIR' && bet.value === winningDir) { isWin = true; profit = bet.amount * 1.9; } 
                     else if(bet.type === 'NUM' && bet.value == winningNum) { isWin = true; profit = bet.amount * 5.0; }
                     
                     let historyItem = {
@@ -474,21 +481,21 @@
                         amount: bet.amount, result: isWin ? "Win" : "Lose",
                         profit: isWin ? profit : 0
                     };
-                    userData.gameHistory.push(historyItem); 
+                    userData.gameHistory.push(historyItem); 
 
                     let row = document.getElementById(bet.id);
                     if(row) {
                         let statusEl = row.querySelector('.bet-status');
-                        if(isWin) { statusEl.innerHTML = `✅ ₹${profit.toFixed(2)}`; statusEl.style.color = '#00ff88'; } 
+                        if(isWin) { statusEl.innerHTML = `✅ ₹${profit.toFixed(2)}`; statusEl.style.color = '#00ff88'; } 
                         else { statusEl.innerHTML = `❌ Lose`; statusEl.style.color = '#ff4d4d'; }
                     }
                     if(isWin) userTotalWin += profit;
                 });
 
                 if(userTotalWin > 0) { userData.inrBalance += userTotalWin; updateBalanceUI(); showWinPopup(userTotalWin); }
-                else { updateBalanceUI(); } 
+                else { updateBalanceUI(); } 
 
-                activeUserBets[timeframe] = []; 
+                activeUserBets[timeframe] = []; 
             }
         }
 
@@ -503,7 +510,7 @@
             document.getElementById('btab-my').classList.remove('active');
             document.getElementById('global-bets-list').style.display = 'none';
             document.getElementById('my-bets-list').style.display = 'none';
-            if(tab === 'global') { document.getElementById('btab-global').classList.add('active'); document.getElementById('global-bets-list').style.display = 'block'; } 
+            if(tab === 'global') { document.getElementById('btab-global').classList.add('active'); document.getElementById('global-bets-list').style.display = 'block'; } 
             else { document.getElementById('btab-my').classList.add('active'); document.getElementById('my-bets-list').style.display = 'block'; }
         }
 
@@ -516,7 +523,7 @@
         function startFakeBots() {
             setInterval(() => {
                 let fakeNames = ["Rahul**", "KingX", "Trader**09", "Win**34", "Pro**21", "Neha**77", "VIP**01"];
-                let amt = Math.floor(Math.random() * 89000) + 1000; 
+                let amt = Math.floor(Math.random() * 89000) + 1000; 
                 let displayVal = Math.random() > 0.5 ? "No. " + Math.floor(Math.random() * 10) : (Math.random() > 0.5 ? "UP" : "DOWN");
                 let dirHTML = displayVal === "UP" ? '<span class="bet-dir up">UP 📈</span>' : (displayVal === "DOWN" ? '<span class="bet-dir down">DOWN 📉</span>' : `<span class="bet-dir num">${displayVal} 🎯</span>`);
                 
