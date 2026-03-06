@@ -55,7 +55,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <script>
-        // ✅ यहाँ आपका पूरा Firebase Config और Database URL फिट है
+        const GATEWAY_KEY = "b8972a60-2106-4b11-bf4e-3cccaf05c64c";
+        const MY_UPI = "Q085382425@ybl";
+        let userData = {};
+
         const firebaseConfig = {
             apiKey: "AIzaSyC1X3E6WPLXn1HTWvcP25yUBmKlvraiHHs",
             authDomain: "smart-earn-459ec.firebaseapp.com",
@@ -131,10 +134,6 @@
     </div>
 
     <script>
-        const GATEWAY_KEY = "b8972a60-2106-4b11-bf4e-3cccaf05c64c";
-        const MY_UPI = "Q085382425@ybl";
-        let userData = {};
-
         window.onload = function() {
             let saved = localStorage.getItem('smartEarnUser');
             if(!saved) { window.location.href = "index.html"; return; }
@@ -178,12 +177,23 @@
             }
         }
 
+        // 🔥 यहाँ मैंने बदलाव किया है ताकि ये APP में भी खुले 🔥
         function initiatePayment() {
             let amt = parseFloat(document.getElementById('dep-amt').value);
             if(isNaN(amt) || amt < 299) return alert("❌ Minimum deposit amount is ₹299.");
 
             let upiUrl = `upi://pay?pa=${MY_UPI}&pn=SmartEarn&am=${amt}&cu=INR`;
-            window.location.href = upiUrl;
+            
+            // APK में GPay/PhonePe खोलने का तरीका
+            let a = document.createElement('a');
+            a.href = upiUrl;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // अगर ऐप नहीं खुलता है, तो UPI Copy हो जाएगा
+            navigator.clipboard.writeText(MY_UPI);
+            alert(`अगर Payment App नहीं खुला, तो हमने UPI ID (${MY_UPI}) कॉपी कर ली है।\n\nआप मैन्युअली ऐप (PhonePe/GPay) में जाकर पेमेंट करें और UTR यहाँ भर दें।`);
 
             document.getElementById('dep-amt').disabled = true;
             document.getElementById('step-1-amount').style.opacity = "0.5";
