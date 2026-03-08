@@ -88,6 +88,31 @@
         .gc-btn:active { transform: scale(0.95); }
 
         @keyframes popUp { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* 🔥 ADMIN SECURITY LOGIN CSS 🔥 */
+        #admin-login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; z-index: 99999;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column; backdrop-filter: blur(10px);
+        }
+        .admin-login-box {
+            background: #1e293b; border: 1px solid #f3ba2f; border-radius: 15px;
+            padding: 40px 30px; width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+        }
+        .admin-login-box h2 { color: #f3ba2f; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; }
+        .admin-input {
+            width: 100%; background: #0b1120; border: 1px solid #334155; color: #fff;
+            padding: 15px; border-radius: 8px; margin-bottom: 15px; outline: none; font-size: 15px; text-align: center; font-weight: bold;
+        }
+        .admin-input:focus { border-color: #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.2);}
+        .admin-btn-login {
+            width: 100%; background: #00ff88; color: #000; font-weight: 900; border: none;
+            padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; text-transform: uppercase;
+            transition: 0.3s; margin-top: 10px;
+        }
+        .admin-btn-login:active { transform: scale(0.95); }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -108,6 +133,16 @@
 </head>
 <body>
 
+    <div id="admin-login-screen">
+        <div class="admin-login-box">
+            <h2>👑 Admin Access</h2>
+            <p style="color:#a0a5b1; font-size:12px; margin-bottom:20px;">Restricted Area. Authorized Personnel Only.</p>
+            <input type="text" id="admin-id-input" class="admin-input" placeholder="Admin ID">
+            <input type="password" id="admin-pass-input" class="admin-input" placeholder="Admin Password">
+            <button class="admin-btn-login" onclick="verifyAdminLogin()">Login to Dashboard</button>
+        </div>
+    </div>
+
     <div class="sidebar">
         <div class="logo">👑 Admin Panel</div>
         <button class="nav-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
@@ -119,7 +154,7 @@
         <button class="nav-btn" onclick="switchTab('withdrawals')">🏦 Withdrawals</button>
         <button class="nav-btn" onclick="switchTab('queries')" style="color:#2196F3; border:1px dashed #2196F3;">🎧 Support Queries</button>
         
-        <button class="logout-btn" onclick="alert('Admin Logged Out'); window.location.href='index.html';" style="margin-top: 20px;">Log Out</button>
+        <button class="logout-btn" onclick="adminLogout()" style="margin-top: 20px;">Log Out</button>
     </div>
 
     <div class="main-content">
@@ -350,13 +385,43 @@
     </div>
 
     <script>
+        // 🔥 ADMIN SECURITY LOGIC 🔥
+        function verifyAdminLogin() {
+            let id = document.getElementById("admin-id-input").value;
+            let pass = document.getElementById("admin-pass-input").value;
+
+            if(id === "BOSS1457" && pass === "BOSS@nagad1457") {
+                // Correct Credentials
+                sessionStorage.setItem("adminLogged", "true");
+                document.getElementById("admin-login-screen").style.display = "none";
+                alert("✅ Admin Logged In Successfully!");
+            } else {
+                // Wrong Credentials
+                alert("❌ Invalid Admin ID or Password!");
+            }
+        }
+
+        function adminLogout() {
+            let confirmOut = confirm("Are you sure you want to log out?");
+            if(confirmOut) {
+                sessionStorage.removeItem("adminLogged");
+                location.reload(); // Reload page to show login screen again
+            }
+        }
+
         let globalUsersData = {}; 
         let currentViewingRefCode = "";
         let adminTimers = { 15: 15, 30: 30, 60: 60 };
 
         window.onload = function() { 
+            // 🔥 CHECK IF ADMIN IS ALREADY LOGGED IN (so it doesn't ask again on refresh) 🔥
+            let isLoggedIn = sessionStorage.getItem("adminLogged");
+            if(isLoggedIn === "true") {
+                document.getElementById("admin-login-screen").style.display = "none";
+            }
+
             fetchAllData(); 
-            loadPendingDeposits(); // Load Deposits
+            loadPendingDeposits(); 
             loadUTRLogs(); 
             loadQueries(); 
         };
@@ -495,7 +560,6 @@
             }
         }
 
-        // 🔥 FETCH ALL DATA (Updated for Deposits) 🔥
         function fetchAllData() {
             db.ref('users').on('value', (snapshot) => {
                 globalUsersData = snapshot.val() || {};
@@ -530,9 +594,7 @@
                     usersHTML += rowHTML;
                     if(isPrimary) primaryHTML += rowHTML;
 
-                    // Deposit History List (Only show processed ones)
                     if(u.depositHistory) {
-                        // Reverse array to show newest first
                         let revHistory = [...u.depositHistory].reverse();
                         revHistory.forEach(dep => {
                             let status = dep.status || "Verified";
@@ -578,7 +640,6 @@
             });
         }
 
-        // 🔥 LOAD PENDING DEPOSIT REQUESTS 🔥
         function loadPendingDeposits() {
             db.ref('admin_deposit_requests').on('value', snap => {
                 let reqs = snap.val();
@@ -614,7 +675,6 @@
             });
         }
 
-        // 🔥 APPROVE & REJECT DEPOSIT LOGIC 🔥
         function approveDeposit(utr, phone, amt) {
             if(!confirm(`💰 Did you receive ₹${amt} for UTR: ${utr}?\n\nClick OK to Add Funds to user's wallet.`)) return;
 
@@ -623,7 +683,6 @@
 
             amt = parseFloat(amt);
             
-            // Calculate Bonus (Same as frontend logic)
             let bonusAmount = 0;
             if(amt >= 10000) bonusAmount = 1500;
             else if(amt >= 5000) bonusAmount = 600;
@@ -675,7 +734,6 @@
             });
         }
 
-        // IMAGE MODAL Logic
         function openProofModal(base64Image) {
             if(!base64Image || base64Image === 'undefined') return alert("Screenshot missing!");
             document.getElementById('proof-img-tag').src = base64Image;
@@ -761,7 +819,6 @@
             }
         }
 
-        // Team Analytics Functions
         function openTeamModal(refCode) { currentViewingRefCode = refCode; document.getElementById('popup-uid').innerText = refCode; document.getElementById('teamModal').style.display = 'flex'; applyTeamFilter('all'); }
         function closeTeamModal() { document.getElementById('teamModal').style.display = 'none'; }
         
