@@ -411,7 +411,8 @@
 
         let globalUsersData = {}; 
         let currentViewingRefCode = "";
-        let adminTimers = { 15: 15, 30: 30, 60: 60 };
+        let adminTimers = { 15: 0, 30: 0, 60: 0 }; // Updated for Server Sync
+        let serverTimeOffset = 0; // 🔥 NEW: Server Time Sync 🔥
 
         window.onload = function() { 
             // 🔥 CHECK IF ADMIN IS ALREADY LOGGED IN (so it doesn't ask again on refresh) 🔥
@@ -419,6 +420,11 @@
             if(isLoggedIn === "true") {
                 document.getElementById("admin-login-screen").style.display = "none";
             }
+
+            // 🔥 GET REAL SERVER TIME DIFFERENCE 🔥
+            db.ref('.info/serverTimeOffset').on('value', function(snap) {
+                serverTimeOffset = snap.val() || 0;
+            });
 
             fetchAllData(); 
             loadPendingDeposits(); 
@@ -432,12 +438,22 @@
             listenToCurrentOverrides();
         }, 500);
 
+        // 🔥 NEW: PERFECT GLOBAL INTERNET TIMER FOR ADMIN 🔥
         function startAdminTimers() {
             setInterval(() => {
+                let nowUnix = Math.floor((Date.now() + serverTimeOffset) / 1000); 
+                
                 [15, 30, 60].forEach(t => {
-                    adminTimers[t]--;
-                    if(adminTimers[t] <= 0) {
-                        adminTimers[t] = t; 
+                    let elapsedInCycle = nowUnix % t;
+                    let remaining = t - elapsedInCycle;
+                    if(remaining === t) remaining = 0;
+
+                    let currentRoundId = nowUnix - elapsedInCycle;
+                    
+                    // Reset Pool Only when a new round starts
+                    if (adminTimers[t] !== currentRoundId) {
+                        adminTimers[t] = currentRoundId; 
+                        
                         let upEl = document.getElementById(`pool-${t}-up`);
                         let downEl = document.getElementById(`pool-${t}-down`);
                         if(upEl) upEl.innerText = "₹0";
@@ -447,11 +463,12 @@
                             if(nEl) nEl.innerText = "₹0";
                         }
                     }
-                    let timeStr = adminTimers[t] < 10 ? '0' + adminTimers[t] : adminTimers[t];
+
+                    let timeStr = remaining < 10 ? '0' + remaining : remaining;
                     let timerEl = document.getElementById(`admin-timer-${t}`);
                     if(timerEl) timerEl.innerText = `00:${timeStr}`;
                 });
-            }, 1000);
+            }, 500); // Check every half second
         }
 
         function listenToLivePools() {
