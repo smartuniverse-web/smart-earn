@@ -45,15 +45,25 @@
         .nav-item.active { color: #f3ba2f; }
         .nav-icon { font-size: 22px; margin-bottom: 3px; display: block;}
 
-        /* 🔥 NEW: FULL PAGE POPUP CSS 🔥 */
+        /* FULL PAGE POPUP CSS */
         .full-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0e14; z-index: 2000; display: none; flex-direction: column; overflow-y: auto; animation: slideUp 0.3s ease-out; }
-        .popup-header-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #151a25; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0;}
+        .popup-header-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #151a25; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0; z-index: 10;}
         .popup-title-bar { font-size: 18px; color: #f3ba2f; font-weight: bold; text-transform: uppercase;}
         .close-btn { color: #ff4d4d; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1;}
         .popup-body { padding: 20px; color: #a0a5b1; font-size: 14px; line-height: 1.6;}
         
+        /* 🔥 MODIFIED CONTACT BOX FOR TELEGRAM 🔥 */
         .contact-box { background: #151a25; border: 1px solid #2a2f3a; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;}
-        .contact-box a { color: #00ff88; text-decoration: none; font-weight: bold; font-size: 16px;}
+        .contact-box a { color: #2196F3; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; background: rgba(33, 150, 243, 0.1); padding: 8px 15px; border-radius: 8px; border: 1px solid #2196F3; margin-bottom: 10px; transition: 0.2s;}
+        .contact-box a:active { transform: scale(0.95); background: #2196F3; color: #fff;}
+        
+        /* 🔥 NEW TELEGRAM CHANNEL BANNER 🔥 */
+        .telegram-banner { background: linear-gradient(135deg, #1e3c72, #2a5298); border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 25px; border: 1px solid #4facfe; box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);}
+        .telegram-banner h3 { color: #fff; font-size: 16px; margin-bottom: 5px;}
+        .telegram-banner p { color: #e2e8f0; font-size: 12px; margin-bottom: 12px;}
+        .telegram-banner a { background: #00ff88; color: #000; text-decoration: none; font-weight: bold; padding: 8px 20px; border-radius: 20px; font-size: 13px; display: inline-block; transition: 0.2s; box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);}
+        .telegram-banner a:active { transform: scale(0.95); }
+
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; font-size: 12px; color: #fff; margin-bottom: 8px; text-transform: uppercase; font-weight: bold;}
         .custom-input { width: 100%; background: #151a25; border: 1px solid #2a2f3a; padding: 12px; color: #fff; font-size: 14px; border-radius: 8px; outline: none; }
@@ -159,13 +169,20 @@
             <div class="close-btn" onclick="closePopup('helpPopup')">✖</div>
         </div>
         <div class="popup-body">
+            
+            <div class="telegram-banner">
+                <h3>🚀 100% Sure Winning Predictions!</h3>
+                <p>Join our official Telegram Channel to get VIP game predictions, winning tricks, and daily promo codes.</p>
+                <a href="https://t.me/smartearn5" target="_blank">👉 Join Telegram Channel 👈</a>
+            </div>
+
             <div class="contact-box">
-                <p style="margin-bottom:10px;">Official Telegram Support:</p>
-                <a href="https://t.me/SmartEarnOfficial" target="_blank">✈️ @SmartEarnOfficial</a>
-                <p style="margin-top:15px; font-size:12px; color:#a0a5b1;">Email: support@smartearn.com</p>
+                <p style="margin-bottom:10px; font-size:13px;">Need instant help? Chat with Admin:</p>
+                <a href="https://t.me/smartearnsupport" target="_blank">💬 @smartearnsupport</a>
+                <p style="margin-top:10px; font-size:12px; color:#a0a5b1;">Email: support@smartearn.com</p>
             </div>
             
-            <h3 style="color:#fff; margin-bottom:15px; border-bottom:1px dashed #2a2f3a; padding-bottom:10px;">Submit a Query</h3>
+            <h3 style="color:#fff; margin-bottom:15px; border-bottom:1px dashed #2a2f3a; padding-bottom:10px;">Or Submit a Ticket Below</h3>
             
             <div class="input-group">
                 <label>Select Subject</label>
@@ -189,8 +206,8 @@
                 <input type="file" id="q-img" class="file-input" accept="image/*">
             </div>
 
-            <button class="btn-main" id="submit-q-btn" onclick="submitQuery()">🚀 Submit Query</button>
-            <p style="text-align:center; font-size:11px; margin-top:15px;">Our team will review your query and reply within 24 hours.</p>
+            <button class="btn-main" id="submit-q-btn" onclick="submitQuery()">🚀 Submit Ticket</button>
+            <p style="text-align:center; font-size:11px; margin-top:15px;">Our team will review your ticket and reply within 24 hours.</p>
         </div>
     </div>
 
@@ -322,18 +339,18 @@
         function saveToFirebase(data, btn) {
             let qId = "Q" + Date.now();
             db.ref('support_queries/' + qId).set(data).then(() => {
-                alert("✅ Query Submitted Successfully!\n\nOur team will review and reply within 24 hours.");
+                alert("✅ Ticket Submitted Successfully!\n\nOur team will review and reply within 24 hours.");
                 closePopup('helpPopup');
                 
                 // Reset Form
-                btn.innerText = "🚀 Submit Query";
+                btn.innerText = "🚀 Submit Ticket";
                 btn.disabled = false;
                 document.getElementById('q-desc').value = "";
                 document.getElementById('q-other').value = "";
                 document.getElementById('q-img').value = "";
             }).catch(err => {
-                alert("❌ Error Submitting Query. Please try again or use a smaller image.");
-                btn.innerText = "🚀 Submit Query";
+                alert("❌ Error Submitting Ticket. Please try again or use a smaller image.");
+                btn.innerText = "🚀 Submit Ticket";
                 btn.disabled = false;
             });
         }
