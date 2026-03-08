@@ -241,9 +241,11 @@
         let currentBetValue = "";
         let winMultiplier = 1.9; 
 
-        // 🔥 NEW: Global Sync & Admin Controls Data 🔥
         let currentRoundIds = { 15: 0, 30: 0, 60: 0 };
         let adminGameControls = { 15: {}, 30: {}, 60: {} };
+
+        // 🔥 Added for Server Time Sync 🔥
+        let serverTimeOffset = 0; 
 
         window.onload = function() {
             let saved = localStorage.getItem('smartEarnUser');
@@ -256,6 +258,11 @@
             document.getElementById('user-id-btn').innerText = "ID: " + userData.myRefCode;
             updateBalanceUI();
             
+            // 🔥 GET REAL SERVER TIME DIFFERENCE 🔥
+            db.ref('.info/serverTimeOffset').on('value', function(snap) {
+                serverTimeOffset = snap.val() || 0;
+            });
+
             // 🔥 START GLOBAL INTERNET TIMER 🔥
             startPerfectGlobalTimers();
             startFakeBots();
@@ -329,7 +336,7 @@
         // 🔥 NEW: PERFECT GLOBAL INTERNET TIMER 🔥
         function startPerfectGlobalTimers() {
             setInterval(() => {
-                let nowUnix = Math.floor(Date.now() / 1000); // Global Internet Second
+                let nowUnix = Math.floor((Date.now() + serverTimeOffset) / 1000); // Global Internet Second
                 
                 [15, 30, 60].forEach(t => {
                     let elapsedInCycle = nowUnix % t;
@@ -358,13 +365,13 @@
             selectedTab = seconds;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab-${seconds}`).classList.add('active');
-            let nowUnix = Math.floor(Date.now() / 1000);
+            let nowUnix = Math.floor((Date.now() + serverTimeOffset) / 1000);
             let rem = seconds - (nowUnix % seconds);
             document.getElementById('main-display-timer').innerText = `00:${rem < 10 ? '0'+rem : rem}`;
         }
 
         function openBetPopup(type, value) {
-            let nowUnix = Math.floor(Date.now() / 1000);
+            let nowUnix = Math.floor((Date.now() + serverTimeOffset) / 1000);
             let rem = selectedTab - (nowUnix % selectedTab);
             if(rem <= 5) return alert(`⏳ BETTING CLOSED! Please wait for new round.`);
             
